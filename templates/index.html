@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<title>Measure Yourself</title>
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/magnific-popup.css') }}">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owl.theme.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/owl.carousel.css') }}">
+
+<!-- MAIN CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-style.css') }}">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+</head>
+<body>
+
+<!-- PRE LOADER -->
+<div class="preloader">
+     <div class="spinner">
+          <span class="sk-inner-circle"></span>
+     </div>
+</div>
+
+
+<!-- MENU -->
+<div class="navbar custom-navbar navbar-fixed-top" role="navigation">
+     <div class="container">
+
+          <!-- NAVBAR HEADER -->
+          <div class="navbar-header">
+               <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+                    <span class="icon icon-bar"></span>
+               </button>
+               <!-- lOGO -->
+               <a href="index.html" class="navbar-brand">Unit</a>
+          </div>
+
+          <!-- MENU LINKS -->
+          <div class="collapse navbar-collapse">
+               <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#home" class="smoothScroll"><b>Home</b></a></li>
+                    <li><a href="#about" class="smoothScroll"><b>How it works</b></a></li>
+                    <li><a href="#team" class="smoothScroll"><b>Past Logs</b></a></li>
+                    <li><a href="#contact" class="smoothScroll"><b>Measure</b></a></li>
+               </ul>
+          </div>
+
+     </div>
+</div>
+
+
+<!-- HOME -->
+<section id="home" !class="parallax-section">
+     <div class="overlay"></div>
+     <div class="container">
+          <div class="row">
+
+               <div class="col-md-8 col-sm-12">
+                    <div class="home-text">
+                         <h1>EG3301R</h1>
+                         <p><b>Let's get things straight -- with measurements.</b></p>
+                         <ul class="section-btn">
+                              <a href="#webcam" class="smoothScroll"><span data-hover="Let's begin">Let's begin</span></a>
+                         </ul>
+                    </div>
+               </div>
+
+          </div>
+     </div>
+</section>
+
+
+<!-- ABOUT -->
+<section id="about" class="parallax-section">
+     <div class="container">
+          <div class="row">
+
+               <div class="col-md-offset-1 col-md-10 col-sm-12">
+                    <div class="about-info">
+                         <h3>How it works</h3>
+                         <h1>Ever found it difficult to take your own body measurements yourself?</h1>
+                         <h1>Unit is here to help.</h1>
+                         <h1>Our digital measuring tape uses a tracking system and bluetooth to guide you through the entire measuring process.</h1>
+                    </div>
+               </div>
+
+          </div>
+     </div>
+</section>
+
+
+<!-- PROJECT -->
+<section id="project" class="parallax-section">
+     <div class="container">
+          <div class="row">
+
+               <div class="col-md-6 col-sm-6">
+                    <!-- PROJECT ITEM -->
+                    <div class="project-item">
+                         <a href="{{ url_for('static',filename='images/measure1.png') }}" class="image-popup">
+                              <img src="{{ url_for('static',filename='images/measure1.png') }}" class="img-responsive" alt="">
+
+                              <div class="project-overlay">
+                                   <div class="project-info">
+                                        <h1>Easy to use</h1>
+                                   </div>
+                              </div>
+                         </a>
+                    </div>
+               </div>
+
+               <div class="col-md-6 col-sm-6">
+                    <!-- PROJECT ITEM -->
+                    <div class="project-item">
+                         <a href="images/measure2.png" class="image-popup">
+                              <img src="images/measure2.png" class="img-responsive" alt="">
+
+                              <div class="project-overlay">
+                                   <div class="project-info">
+                                        <h1>Just for you</h1>
+
+                                   </div>
+                              </div>
+                         </a>
+                    </div>
+               </div>
+
+               <div class="col-md-6 col-sm-6">
+                    <!-- PROJECT ITEM -->
+                    <div class="project-item">
+                         <a href="images/measure3.png" class="image-popup">
+                              <img src="images/measure3.png" class="img-responsive" alt="">
+
+                              <div class="project-overlay">
+                                   <div class="project-info">
+                                        <h1>Guided system</h1>
+                                   </div>
+                              </div>
+                         </a>
+                    </div>
+               </div>
+
+               <div class="col-md-6 col-sm-6">
+                    <!-- PROJECT ITEM -->
+                    <div class="project-item">
+                         <a href="images/measure4.png" class="image-popup">
+                              <img src="images/measure4.png" class="img-responsive" alt="">
+
+                              <div class="project-overlay">
+                                   <div class="project-info">
+                                        <h1>No fuss</h1>
+                                   </div>
+                              </div>
+                         </a>
+                    </div>
+               </div>
+
+          </div>
+     </div>
+</section>
+
+
+<!-- TEAM -->
+<section id="team" class="parallax-section">
+     <div class="container">
+          <div class="row">
+
+               <div class="col-md-offset-2 col-md-8 col-sm-12">
+                    <div class="section-title">
+                        <hr width=30% align=center>
+                        <h2>Past measurements</h2>
+                    </div>
+               </div>
+
+               <div class="clearfix"></div>
+               <div class="horizontal">
+                   <div class="table">
+                       <article>
+                           <a href="#openModal"><h3>11 09 18 1455</h3></a>
+                       </article>
+                       <article>
+                          <a href="#openModal"><h3>27 08 18 1143</h3></a>
+                        </article>
+                        <article>
+                          <a href="#openModal"><h3>19 08 18 0935</h3></a>
+                        </article>
+                        <article>
+                          <a href="#openModal"><h3>07 08 18 1902</h3></a>
+                        </article>
+                       <!-- Repeat this part as many times as necessary. -->
+                   </div>
+               </div>
+
+
+
+<!-- insert script for modal buttons here-->
+<!--<a href="#openModal">11 September 2018, 4.55pm</a>-->
+
+<div id="openModal" class="modalDialog">
+	<div>
+		<a href="#close" title="Close" class="close">X</a>
+		<h2>MEASUREMENTS</h2>
+		<p>Neck: -</p>
+    <p>Shoulder: -</p>
+    <p>Chest: -</p>
+    <p>Waist: -</p>
+    <p>Torso length: -</p>
+    <p>Arm length: -</p>
+	</div>
+</div>
+
+
+
+               <!--<button class="trigger">29 August 2018, 3.44pm</button>
+               <div class="modal">
+                   <div class="modal-content">
+                       <span class="close-button">×</span>
+                       <h1>Measurements</h1>
+                       <p> Neck: </p>
+                   </div>
+               </div>-->
+
+
+
+            <!--   <div id="owl-team" class="owl-carousel">
+                    <div class="col-md-4 col-sm-4 item">
+                         <div class="measure-item" class="img-responsive" alt="">
+                           <p>Click and access past measurements</p>
+                         </div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-4 item">
+                         <div class="measure-item">
+                            <p>9 September 2018, 6.44pm</p>
+                         </div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-4 item">
+                         <div class="measure-item">
+                              <p>31 August 2018, 5.20pm</p>
+                         </div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-4 item">
+                         <div class="measure-item">
+                              <p>19 August 2018, 2.15pm</p>
+                         </div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-4 item">
+                         <div class="measure-item">
+                              <p>1 August 2018, 9.59pm</p>
+                         </div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-4 item">
+                         <div class="measure-item">
+                              <p>29 July 2018, 7.37pm</p>
+                         </div>
+                    </div>
+               </div>-->
+          </div>
+     </div>
+</section>
+
+
+<!-- Previously the was the section for query submission-->
+<!-- WEBCAM SECTION -->
+<!--html body for webcam-->
+<div id="webcam" class="container">
+  <div class="row">
+
+       <div class="col-md-offset-3 col-md-6 col-sm-12">
+            <div class="section-title">
+                <hr width=30% align=center>
+                <h2 align=center>Measure</h2>
+                <p style="clear: both">
+                <!-- <video autoplay="true" id="videoElement"></video> -->
+                <img id="bg" src="{{ url_for('video_feed') }}" alt="vid">
+                
+                <form>
+                    <input type="button" value="Start" onclick="startPython()">
+                    <input type="button" value="Stop" onclick="quit()">
+                    <input type="button" value="Restart" onclick="test()">
+                </form>
+            </div>
+            <canvas id="canvas"></canvas>
+            <!--<img id="bg" src="{{ url_for('video_feed') }}" alt="vid">-->
+       </div>
+
+<!--    <div id="containerVideo">
+        <video autoplay="true" id="videoElement">
+
+        </video>
+      </div>-->
+</div>
+
+
+<!-- FOOTER -->
+<footer>
+     <div class="container">
+          <div class="row">
+
+               <div class="col-md-offset-3 col-md-5 col-sm-6">
+                    <h2>IS325</h2>
+                    <p>Improving fit</p>
+
+
+               </div>
+
+<!--               <div class="col-md-4 col-sm-6">
+                    <div class="footer-info">
+                    	<h2>EG3301R</h2>
+
+                    </div>
+               </div>-->
+
+               <div class="col-md-3 col-sm-12">
+
+                    <h2>Members</h2>
+                    <p><small>Atharv Joshi</small></p>
+                    <p><small>Harith Hakim</small></p>
+                    <p><small>Maxine Tan</small></p>
+                    <p><small>P Srivatsa</small></p>
+                    <!--<ul class="social-icon">
+                         <li><a href="#" class="fa fa-twitter"></a></li>
+                         <li><a href="#" class="fa fa-facebook"></a></li>
+                         <li><a href="#" class="fa fa-instagram"></a></li>
+                         <li><a href="#" class="fa fa-linkedin"></a></li>
+                    </ul>-->
+
+               </div>
+
+               <div class="clearfix"></div>
+
+               <div class="col-md-12 col-sm-12">
+                    <div class="copyright-text">
+                         <p>Copyright © 2018 Company Name | Design: <a href="https://www.facebook.com/tooplate" target="_parent">Tooplate</a></p>
+                    </div>
+               </div>
+
+          </div>
+     </div>
+</footer>
+
+<!-- SCRIPTS -->
+<!--
+<script>
+    // You can also require other files to run in this process
+    require('./renderer.js')
+</script>
+-->
+<script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='js/smoothscroll.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/jquery.parallax.js') }}"></script>
+<script src="{{ url_for('static', filename='js/owl.carousel.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/magnific-popup-options.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modernizr.custom.js') }}"></script>
+<script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+<script src="{{ url_for('static', filename='js/webcam.js') }}"></script>
+</body>
+</html>
