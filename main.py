@@ -16,12 +16,25 @@
 from flask import Flask, render_template, Response, send_from_directory
 from camera import VideoCamera
 from tf_pose_estimation.run_v3 import PoseEstimator
-import threading
+import threading, queue
 import cv2
+import json
+from serial_connect import measurementSerialThread
+
+app = Flask(__name__, static_url_path='')
 
 estimator = PoseEstimator()
 estimator.configure()
-app = Flask(__name__, static_url_path='')
+dataQ = queue.Queue()
+errQ = queue.Queue()
+ser = measurementSerialThread(dataQ, errQ, baudrate=115200)
+ser.daemon = True
+ser.start()
+print("Measurement thread started")
+
+#@app.before_first_request
+#def configure():
+#    estimator.configure()
 
 @app.route('/js/<path:path>')
 def send_js(path):
@@ -39,16 +52,30 @@ def send_img(path):
 def index():
     return render_template('index.html')
 
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen(VideoCamera().start()),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
 def gen(camera):
     while True:
-        frame = camera.get_frame(estimator)
+        if camera.stopped:
+            break
+        #frame = camera.get_frame(estimator)
+        get_bluno_data()
+        frame = camera.read(estimator)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(gen(VideoCamera()),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+def get_bluno_data():
+  measurement = read_measurement_from_serial()
+  return measurement
+
+def read_measurement_from_serial():
+  reading = "reading"
+  if not dataQ.empty():
+    #TODO
+  return reading
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=True, threaded=True)
