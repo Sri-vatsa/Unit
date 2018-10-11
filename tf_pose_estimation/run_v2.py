@@ -77,7 +77,7 @@ def aruco_tracking(image, mtx, dist, rectangle_corners):
         RectTopLeftX = rectangle_corners[0][0]
         RectTopLeftY = rectangle_corners[0][1]
         RectBottomRightX = rectangle_corners[1][0]
-        RectBottomRightY = rectangle_corners[1][0]
+        RectBottomRightY = rectangle_corners[1][1]
         #draw rectangle
         #cv2.rectangle(image, (RectTopLeftX,RectTopLeftY), (RectBottomRightX, RectBottomRightY), (200,0,0), 5)
         

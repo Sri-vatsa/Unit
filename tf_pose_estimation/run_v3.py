@@ -99,7 +99,7 @@ class PoseEstimator():
             RectTopLeftX = rectangle_corners[0][0]
             RectTopLeftY = rectangle_corners[0][1]
             RectBottomRightX = rectangle_corners[1][0]
-            RectBottomRightY = rectangle_corners[1][0]
+            RectBottomRightY = rectangle_corners[1][1]
             # draw rectangle
             # cv2.rectangle(image, (RectTopLeftX,RectTopLeftY), (RectBottomRightX, RectBottomRightY), (200,0,0), 5)
 
@@ -299,19 +299,22 @@ class PoseEstimator():
         _angle = angle * pi / 180.0
         b = cos(_angle) * 0.5
         a = sin(_angle) * 0.5
-        pt0 = (int(x0 - a * height - b * width),
-               int(y0 + b * height - a * width))
-        pt1 = (int(x0 + a * height - b * width),
-               int(y0 - b * height - a * width))
-        pt2 = (int(2 * x0 - pt0[0]), int(2 * y0 - pt0[1]))
-        pt3 = (int(2 * x0 - pt1[0]), int(2 * y0 - pt1[1]))
+        try:
+            pt0 = (int(x0 - a * height - b * width),
+                int(y0 + b * height - a * width))
+            pt1 = (int(x0 + a * height - b * width),
+                int(y0 - b * height - a * width))
+            pt2 = (int(2 * x0 - pt0[0]), int(2 * y0 - pt0[1]))
+            pt3 = (int(2 * x0 - pt1[0]), int(2 * y0 - pt1[1]))
 
-        rectangle_corners = (pt1, pt3)
+            rectangle_corners = (pt1, pt3)
 
-        cv2.line(img, pt0, pt1, (255, 255, 255), 3)
-        cv2.line(img, pt1, pt2, (255, 255, 255), 3)
-        cv2.line(img, pt2, pt3, (255, 255, 255), 3)
-        cv2.line(img, pt3, pt0, (255, 255, 255), 3)
+            cv2.line(img, pt0, pt1, (255, 255, 255), 2)
+            cv2.line(img, pt1, pt2, (255, 255, 255), 2)
+            cv2.line(img, pt2, pt3, (255, 255, 255), 2)
+            cv2.line(img, pt3, pt0, (255, 255, 255), 2)
+        except:
+            return img, None
 
         return img, rectangle_corners
 
@@ -405,13 +408,13 @@ class PoseEstimator():
             # TODO fix angle
             if left_centre is not None:
                 image, rectangle_corners = self.draw_angled_rec(
-                    left_centre[0], left_centre[1], 100, 100, left_arm_angle, image)
+                    left_centre[0], left_centre[1], 50, 50, left_arm_angle, image)
 
             # draw angled rectangle on right arm
             # TODO fix angle
             if right_centre is not None:
                 image, rectangle_corners = self.draw_angled_rec(
-                    right_centre[0], right_centre[1], 100, 100, right_arm_angle, image)
+                    right_centre[0], right_centre[1], 50, 50, right_arm_angle, image)
 
             print("Image shape: " + str(image.shape))
 
