@@ -13,7 +13,7 @@
 # 1. Install Python dependencies: cv2, flask. (wish that pip install works like a charm)
 # 2. Run "python main.py".
 # 3. Navigate the browser to the local webpage.
-from flask import Flask, render_template, Response, send_from_directory
+from flask import Flask, render_template, Response, send_from_directory, request, make_response
 from camera import VideoCamera
 from tf_pose_estimation.run_v3 import PoseEstimator
 import threading, queue
@@ -52,6 +52,16 @@ def send_img(path):
 def index():
     return render_template('index.html')
 
+@app.route('/get_readings' , methods=['GET','POST'])
+def get_readings():
+    #data = request.form['keyword']
+    data = get_bluno_data()
+    print(data)
+    resp = make_response(json.dumps(data))
+    resp.status_code = 200
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
+
 @app.route('/video_feed')
 def video_feed():
     return Response(gen(VideoCamera().start()),
@@ -62,7 +72,7 @@ def gen(camera):
         if camera.stopped:
             break
         #frame = camera.get_frame(estimator)
-        get_bluno_data()
+        #get_bluno_data()
         frame = camera.read(estimator)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
@@ -72,10 +82,11 @@ def get_bluno_data():
   return measurement
 
 def read_measurement_from_serial():
-  reading = "reading"
+  reading = "No reading yet"
   if not dataQ.empty():
-    #TODO
+    reading = dataQ.get_nowait()
   return reading
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, threaded=True)

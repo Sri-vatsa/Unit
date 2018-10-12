@@ -34,9 +34,10 @@ class VideoCamera(object):
             (self.grabbed, self.frame) = self.video.read()
 
     def read(self, estimator):
-        img = cv2.resize(self.frame, (432, 384)) 
+        img = cv2.resize(self.frame, (640, 480)) 
         img = cv2.flip( img, 1)
         img = estimator.predict(img)
+        #img = estimator.aruco_tracking(img, estimator.mtx, estimator.dist, None)
         ret, jpeg = cv2.imencode('.jpg', img)
         return jpeg.tobytes()
 

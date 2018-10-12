@@ -15,6 +15,7 @@ from tf_pose.estimator import TfPoseEstimator
 from tf_pose.networks import get_graph_path, model_wh
 
 logger = logging.getLogger('TfPoseEstimator')
+logger.disabled = True
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
@@ -31,7 +32,7 @@ class PoseEstimator():
         self.model_type = model_type
         self.width = width
         self.height = height
-        self.resize_out_ratio = 3.0
+        self.resize_out_ratio = 4.0
         self.model = None
         self.mtx = None
         self.dist = None
@@ -93,7 +94,8 @@ class PoseEstimator():
         return mtx, dist
 
     def aruco_tracking(self, image, mtx, dist, rectangle_corners):
-
+        
+        #print(rectangle_corners)
         # Rectangle Coordinates
         if rectangle_corners is not None:
             RectTopLeftX = rectangle_corners[0][0]
@@ -109,9 +111,17 @@ class PoseEstimator():
             parameters = aruco.DetectorParameters_create()
 
             # lists of ids and the corners beloning to each id
-            corners, ids, rejectedImgPoints = aruco.detectMarkers(
-                gray, aruco_dict, parameters=parameters)
+            corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
 
+            '''
+            print("#####################")
+            print("Corners")
+            print(corners)
+            print("#####################")
+            print("Rejected points")
+            print(rejectedImgPoints)
+            print("#####################")
+            '''
             font = cv2.FONT_HERSHEY_SIMPLEX  # font for displaying text (below)
 
             if np.all(ids != None):
@@ -130,7 +140,7 @@ class PoseEstimator():
                      corners[0][0][2][0] + corners[0][0][3][0]) / 4
                 y = (corners[0][0][0][1] + corners[0][0][1][1] +
                      corners[0][0][2][1] + corners[0][0][3][1]) / 4
-                print(str(x) + "," + str(y))
+                #print(str(x) + "," + str(y))
 
                 if x > RectTopLeftX and x < RectBottomRightX and y > RectTopLeftY and y < RectBottomRightY:
                     Red = 0
@@ -290,8 +300,7 @@ class PoseEstimator():
         vec_1 = p1 - p0
         vec_2 = p2 - p0
 
-        angle = np.arccos(np.dot(vec_1, vec_2) /
-                          (np.linalg.norm(vec_1)*np.linalg.norm(vec_2)))
+        angle = np.arccos(np.dot(vec_1, vec_2) / (np.linalg.norm(vec_1)*np.linalg.norm(vec_2)))
         return angle
 
     def draw_angled_rec(self, x0, y0, width, height, angle, img):
@@ -362,6 +371,9 @@ class PoseEstimator():
         else:
             self.model = TfPoseEstimator(get_graph_path(self.model_type), target_size=(self.width, self.height))
 
+        #print("YAY Config was done")
+        #print(self.mtx, self.dist, self.width, self.height)
+
 
     def predict(self, orig_image):
         #ret_val, orig_image = self.cam.read()
@@ -399,7 +411,7 @@ class PoseEstimator():
             left_centre = self.compute_arm_centre_left(each_human_coordinates)
             right_centre = self.compute_arm_centre_right(each_human_coordinates)
 
-            print(left_centre)
+            #print(left_centre)
 
             left_arm_angle = self.compute_angle_of_left_arm(each_human_coordinates)
             right_arm_angle = self.compute_angle_of_right_arm(each_human_coordinates)
@@ -408,22 +420,22 @@ class PoseEstimator():
             # TODO fix angle
             if left_centre is not None:
                 image, rectangle_corners = self.draw_angled_rec(
-                    left_centre[0], left_centre[1], 50, 50, left_arm_angle, image)
+                    left_centre[0], left_centre[1], 75, 75, left_arm_angle, image)
 
             # draw angled rectangle on right arm
             # TODO fix angle
             if right_centre is not None:
                 image, rectangle_corners = self.draw_angled_rec(
-                    right_centre[0], right_centre[1], 50, 50, right_arm_angle, image)
+                    right_centre[0], right_centre[1], 75, 75, right_arm_angle, image)
 
-            print("Image shape: " + str(image.shape))
+            #print("Image shape: " + str(image.shape))
 
         # TODO toggle between rectangle corners for different squares for different measurements
         image = self.aruco_tracking(image, self.mtx, self.dist, rectangle_corners)
 
         # Print measurements to screen
-        print("Arm measurements for each person (Left, Right):")
-        print(arm_lengths_all)
+        #print("Arm measurements for each person (Left, Right):")
+        #print(arm_lengths_all)
         # print("Leg measurements for each person (Left, Right):")
         # print(leg_lengths_all)
 
