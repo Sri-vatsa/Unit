@@ -47,7 +47,11 @@ class measurementSerialThread(threading.Thread):
         # check if final output received, if so, print useful part of previous line
         if (str_list[0] == "d" and str_list[1] != 's' and str_list[1] != ""): 
             print("Final Measurement: " + str_list[1])
-            self.dataQ.put(str_list[1])
+            
+            #Process data
+            measurement = int(str_list[1])/12.0
+
+            self.dataQ.put(str(measurement))
             str_list = ["", ""] # reinitialise str_list
         if not self.inputStarted:
           self.logger.debug('reading')

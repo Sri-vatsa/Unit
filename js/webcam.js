@@ -94,7 +94,7 @@ function getReading() {
     $('#reading').click(function() {
 
         $.ajax({
-            url: '0.0.0.0/5000/get_readings',
+            url: '0.0.0.0:5000/get_readings',
             type: 'POST',
             dataType: 'json',
             success: function(response) {

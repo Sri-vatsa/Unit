@@ -27,9 +27,9 @@ estimator = PoseEstimator()
 estimator.configure()
 dataQ = queue.Queue()
 errQ = queue.Queue()
-ser = measurementSerialThread(dataQ, errQ, baudrate=115200)
-ser.daemon = True
-ser.start()
+#ser = measurementSerialThread(dataQ, errQ, baudrate=115200)
+#ser.daemon = True
+#ser.start()
 print("Measurement thread started")
 
 #@app.before_first_request
@@ -52,15 +52,28 @@ def send_img(path):
 def index():
     return render_template('index.html')
 
+'''
 @app.route('/get_readings' , methods=['GET','POST'])
 def get_readings():
     #data = request.form['keyword']
     data = get_bluno_data()
-    print(data)
+    #print(data)
     resp = make_response(json.dumps(data))
     resp.status_code = 200
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
+'''
+
+@app.route('/configure_tracker', methods=['POST'])
+def configure_tracker():
+    data = request.form
+    bounding_box = json.loads(data["bb"])
+    estimator.configure_tracker(bounding_box)
+    resp = make_response("Success")
+    resp.status_code = 200
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
+
 
 @app.route('/video_feed')
 def video_feed():

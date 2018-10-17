@@ -36,6 +36,10 @@ class PoseEstimator():
         self.model = None
         self.mtx = None
         self.dist = None
+        
+        self.initBB = None #(176, 89, 72, 115)
+        self.tracker = None
+        self.trackerHasStarted = False
 
         self.body_mapping = ["nose", "neck", "R-shoulder", "R-elbow", "R-wrist", "L-shoulder", "L-elbow", "L-wrist",
                 "R-hip", "R-knee", "R-ankle", "L-hip", "L-knee", "L-ankle", "L-eye", "R-eye", "L-ear", "R-ear"]
@@ -48,7 +52,6 @@ class PoseEstimator():
     '''
     Set Aruco parameters
     '''
-
     def configure_aruco(self):
         # termination criteria
         criteria = (cv2.TERM_CRITERIA_EPS +
@@ -63,7 +66,6 @@ class PoseEstimator():
     '''
     Camera calibration for aruco
     '''
-
     def calibrate_camera(self, objp, criteria):
         # Arrays to store object points and image points from all the images.
         objpoints = []  # 3d point in real world space
@@ -358,13 +360,68 @@ class PoseEstimator():
 
         return (left_leg_length, right_leg_length)
 
-    # Main functions
+    def is_tracker_in_pose_rect(self, tracker_coord, pose_rect_corners):
+        if tracker_coord is None or pose_rect_corners is None:
+            return False
+        return 
 
+    def csrt_tracking(self, frame, initBB):    
+        
+        if initBB is not None:
+            # grab the new bounding box coordinates of the object
+            (success, box) = self.tracker.update(frame)
+            #print(box)
+
+            tracker_coord = None
+
+            # check to see if the tracking was a success
+            if success:
+                (x, y, w, h) = [int(v) for v in box]
+                cv2.rectangle(frame, (x, y), (x + w, y + h),
+                            (0, 255, 0), 2)
+                tracker_coord = (x,y,w,h)
+
+            # initialize the set of information we'll be displaying on
+            # the frame
+            info = [
+                ("Tracker", "MIL"),
+                ("Success", "Yes" if success else "No"),
+            ]
+            
+            '''
+            # loop over the info tuples and draw them on our frame
+            for (i, (k, v)) in enumerate(info):
+                text = "{}: {}".format(k, v)
+                cv2.putText(frame, text, (10, 432 - ((i * 20) + 20)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+            '''
+        return frame, tracker_coord
+
+    def configure_tracker(self, bb):
+        # kcf tracker setup
+        #self.tracker = cv2.TrackerMIL_create()
+        if self.trackerHasStarted:
+            self.tracker = None
+            print()
+            self.tracker = cv2.TrackerCSRT_create()
+            self.initBB = (bb[0], bb[1], bb[2], bb[3])
+            self.trackerHasStarted = False
+        else:
+            self.initBB = (bb[0], bb[1], bb[2], bb[3])
+        #print(self.initBB)
+
+    # Main functions
     def configure(self):
         #self.cam = cv2.VideoCapture(self.cam_id)
         # camera calibration
-        objp, criteria = self.configure_aruco()
-        self.mtx, self.dist = self.calibrate_camera(objp, criteria)
+        #objp, criteria = self.configure_aruco()
+        #self.mtx, self.dist = self.calibrate_camera(objp, criteria)
+
+        # CSRT tracker setup
+        #self.tracker = cv2.TrackerCSRT_create()
+
+        # kcf tracker setup
+        self.tracker = cv2.TrackerCSRT_create()
 
         if self.width == 0 or self.height == 0:
             self.model = TfPoseEstimator(get_graph_path(self.model_type), target_size=(432, 368))
@@ -390,7 +447,8 @@ class PoseEstimator():
         # logger.info('inference image: %s in %.4f seconds.' % (args.image, elapsed))
 
         image_with_lines, body_coordinates = TfPoseEstimator.draw_humans(image_with_lines, humans, imgcopy=False)
-        rectangle_corners = None
+        pose_rect_corners = None
+        tracker_coord = None
         arm_lengths_all = []
         leg_lengths_all = []
         # Process body data detected by model
@@ -419,20 +477,27 @@ class PoseEstimator():
             # draw angled rectangle on left arm
             # TODO fix angle
             if left_centre is not None:
-                image, rectangle_corners = self.draw_angled_rec(
-                    left_centre[0], left_centre[1], 75, 75, left_arm_angle, image)
+                image, pose_rect_corners = self.draw_angled_rec(
+                    left_centre[0], left_centre[1], 50, 50, left_arm_angle, image)
 
             # draw angled rectangle on right arm
             # TODO fix angle
             if right_centre is not None:
-                image, rectangle_corners = self.draw_angled_rec(
-                    right_centre[0], right_centre[1], 75, 75, right_arm_angle, image)
+                image, pose_rect_corners = self.draw_angled_rec(
+                    right_centre[0], right_centre[1], 50, 50, right_arm_angle, image)
 
             #print("Image shape: " + str(image.shape))
 
         # TODO toggle between rectangle corners for different squares for different measurements
-        image = self.aruco_tracking(image, self.mtx, self.dist, rectangle_corners)
+        #image = self.aruco_tracking(image, self.mtx, self.dist, pose_rect_corners)
+        if not self.trackerHasStarted and self.initBB is not None:
+            self.tracker.init(image, self.initBB)
+            self.trackerHasStarted = True
+        
+        if self.trackerHasStarted and self.initBB is not None:
+            image, tracker_coord = self.csrt_tracking(image, self.initBB)
 
+        isTrackerInRightPlace = self.is_tracker_in_pose_rect(tracker_coord, pose_rect_corners)
         # Print measurements to screen
         #print("Arm measurements for each person (Left, Right):")
         #print(arm_lengths_all)
@@ -503,7 +568,7 @@ class PoseEstimator():
             # logger.info('inference image: %s in %.4f seconds.' % (args.image, elapsed))
 
             image_with_lines, body_coordinates = TfPoseEstimator.draw_humans(image_with_lines, humans, imgcopy=False)
-            rectangle_corners = None
+            pose_rect_corners = None
             arm_lengths_all = []
             leg_lengths_all = []
             for human in range(len(body_coordinates)):
@@ -540,17 +605,17 @@ class PoseEstimator():
                 # draw angled rectangle on left arm
                 # TODO fix angle
                 if left_centre is not None:
-                    image, rectangle_corners = draw_angled_rec(left_centre[0], left_centre[1], 100, 100, left_arm_angle, image)
+                    image, pose_rect_corners = draw_angled_rec(left_centre[0], left_centre[1], 100, 100, left_arm_angle, image)
 
                 # draw angled rectangle on right arm
                 # TODO fix angle
                 if right_centre is not None:
-                    image, rectangle_corners = draw_angled_rec(right_centre[0], right_centre[1], 100, 100, right_arm_angle, image)
+                    image, pose_rect_corners = draw_angled_rec(right_centre[0], right_centre[1], 100, 100, right_arm_angle, image)
 
                 print("Image shape: " + str(image.shape))
             
             # TODO toggle between rectangle corners for different squares for different measurements
-            image = aruco_tracking(image, mtx, dist, rectangle_corners)
+            image = aruco_tracking(image, mtx, dist, pose_rect_corners)
 
             # Print measurements to screen
             print("Arm measurements for each person (Left, Right):")
