@@ -20,6 +20,7 @@ import threading, queue
 import cv2
 import json
 from serial_connect import measurementSerialThread
+from tape_tracker.tape_tracker import TapeTrackerThread
 
 app = Flask(__name__, static_url_path='')
 
@@ -27,10 +28,18 @@ estimator = PoseEstimator()
 estimator.configure()
 dataQ = queue.Queue()
 errQ = queue.Queue()
-#ser = measurementSerialThread(dataQ, errQ, baudrate=115200)
-#ser.daemon = True
-#ser.start()
+objd_in_q = queue.Queue()
+objd_out_q = queue.Queue()
+measurements_consol = {}
+ser = measurementSerialThread(dataQ, errQ, baudrate=115200)
+ser.daemon = True
+ser.start()
 print("Measurement thread started")
+
+tracker = TapeTrackerThread(objd_in_q, objd_out_q)
+tracker.daemon = True
+tracker.start()
+print("Tracker is initialised")
 
 #@app.before_first_request
 #def configure():
@@ -52,17 +61,32 @@ def send_img(path):
 def index():
     return render_template('index.html')
 
-'''
 @app.route('/get_readings' , methods=['GET','POST'])
 def get_readings():
     #data = request.form['keyword']
     data = get_bluno_data()
-    #print(data)
-    resp = make_response(json.dumps(data))
+    measurements_consol["data"] = data
+    resp = make_response(json.dumps(measurements_consol))
     resp.status_code = 200
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
-'''
+
+@app.route('/next', methods=['POST'])
+def next():
+  estimator.state_next()
+  print(measurements_consol[0])
+  resp = make_response(estimator.state)
+  resp.status_code = 200
+  resp.headers['Access-Control-Allow-Origin'] = '*'
+  return resp
+
+@app.route('/reset', methods=['POST'])
+def reset():
+  estimator.state_reset()
+  resp = make_response("Success")
+  resp.status_code = 200
+  resp.headers['Access-Control-Allow-Origin'] = '*'
+  return resp
 
 @app.route('/configure_tracker', methods=['POST'])
 def configure_tracker():
@@ -81,14 +105,43 @@ def video_feed():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def gen(camera):
+    count = 0
     while True:
         if camera.stopped:
             break
         #frame = camera.get_frame(estimator)
         #get_bluno_data()
-        frame = camera.read(estimator)
+
+        curr_state = estimator.state
+
+        img = camera.read()
+
+        # estimate
+        img_est, measurements = estimator.predict(img)
+        measurements_consol[0] = measurements
+
+        # obj det
+        objd_in_q.put(img)
+        (img_det, bb_coord) = objd_out_q.get()
+        
+        if len(bb_coord) != 0 and count > 10:
+          estimator.configure_tracker(bb_coord[0])
+          count = 0
+          print(bb_coord[0])
+
+        count = count + 1
+
+        if curr_state is not "reference":
+          byte_frame = img_to_bytes(img_est)
+        else:
+          byte_frame = img_to_bytes(img_det)
+
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+              b'Content-Type: image/jpeg\r\n\r\n' + byte_frame + b'\r\n\r\n')
+
+def img_to_bytes(img):
+  ret, jpeg = cv2.imencode('.jpg', img)
+  return jpeg.tobytes()
 
 def get_bluno_data():
   measurement = read_measurement_from_serial()
@@ -102,4 +155,4 @@ def read_measurement_from_serial():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, threaded=True)
+    app.run(host='0.0.0.0', debug=True, threaded=True, ssl_context='adhoc')

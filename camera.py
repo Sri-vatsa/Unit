@@ -33,13 +33,11 @@ class VideoCamera(object):
             # otherwise, read the next frame from the stream
             (self.grabbed, self.frame) = self.video.read()
 
-    def read(self, estimator):
+    def read(self):
         img = cv2.resize(self.frame, (576, 432)) 
         img = cv2.flip( img, 1)
-        img = estimator.predict(img)
         #img = estimator.aruco_tracking(img, estimator.mtx, estimator.dist, None)
-        ret, jpeg = cv2.imencode('.jpg', img)
-        return jpeg.tobytes()
+        return img
 
     def stop(self):
         # indicate that the thread should be stopped

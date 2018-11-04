@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>Measure Yourself</title>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/magnific-popup.css') }}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.carousel.css') }}">
+
+    <!-- MAIN CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-style.css') }}">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+    
+</body>
+
+<script>
+    document.head.innerHTML = '';
+document.body.innerHTML = `
+    <div class="radio-container" style="height:1000px">
+         <div class="col-6">
+          <button id="radio0">None</button>
+         </div>
+        <div class="col-6">
+         <button id="radio1">next</button>
+        </div>
+        <div class="col-6">
+         <button id="radio2">end</button>
+        </div>
+        <div class="col-6">
+         <button id="radio3">reset</button>
+        </div>
+      </div>
+`;
+
+document.addEventListener('click', ({ target }) => {
+  if (!target.matches('button')) return;
+  console.log('Click detected: ' + target.outerHTML);
+});
+var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
+var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
+
+
+var buttonNames = [ 'None', 'next', 'end', 'reset'];
+
+var recognition = new SpeechRecognition();
+
+document.body.onclick = function(e) {
+  if (e.target.matches('button')) return;
+  recognition.start();
+  console.log('Listening');
+}
+
+recognition.onresult = function(event) {
+  var last = event.results.length - 1;
+  var speechText = event.results[last][0].transcript;
+  console.log('Heard ' + speechText);
+  const foundButtonIndex = buttonNames.findIndex(buttonName => buttonName === speechText);
+  console.log(foundButtonIndex);
+  if (foundButtonIndex !== -1) document.querySelectorAll('button')[foundButtonIndex].click();
+}
+
+recognition.onspeechend = function() {
+  recognition.stop();
+}
+
+recognition.onnomatch = function(event) {
+  console.log('Not recognized')
+}
+
+recognition.onerror = function(event) {
+  console.log('Error ' + event.error);
+}
+</script>

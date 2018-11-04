@@ -4,6 +4,7 @@ import sys
 import time
 import glob
 from math import sqrt, pow, pi, sin, cos
+from state_management import State
 
 sys.path.append("./tf_pose_estimation/")
 
@@ -24,6 +25,10 @@ formatter = logging.Formatter(
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
+ALL_STATES = ["reference", "linear-measurements",
+              "left-arm", "right-arm", "neck", "chest"]
+AUTO_STEPS = [ALL_STATES[0], ALL_STATES[1]]
+
 
 class PoseEstimator():
     def __init__(self, model_type='mobilenet_thin', width=144, height=128):
@@ -36,22 +41,30 @@ class PoseEstimator():
         self.model = None
         self.mtx = None
         self.dist = None
-        
-        self.initBB = None #(176, 89, 72, 115)
+
+        self.initBB = None  # (176, 89, 72, 115)
         self.tracker = None
         self.trackerHasStarted = False
+        self.isTrackerInRightPlace = False
+
+
+        self.state_manager = State(ALL_STATES)
+        self.state = self.state_manager.get_current_state()
 
         self.body_mapping = ["nose", "neck", "R-shoulder", "R-elbow", "R-wrist", "L-shoulder", "L-elbow", "L-wrist",
-                "R-hip", "R-knee", "R-ankle", "L-hip", "L-knee", "L-ankle", "L-eye", "R-eye", "L-ear", "R-ear"]
+                             "R-hip", "R-knee", "R-ankle", "L-hip", "L-knee", "L-ankle", "L-eye", "R-eye", "L-ear", "R-ear"]
 
         # represents the equivalent of 1 pixel in real distance (cm)
         self.PIXEL_TO_DIST = 170.0/350
         self.fps_time = 0
-        self.CALIBRATION_IMAGES_PATH = 'tf_pose_estimation/calib_images/*.jpg'
+        self.BODY_OUTLINE_IMAGE = 'images/bodyoutline.png'
+
+        self.CALIBRATION_IMAGES_PATH = 'tf_pose_estimation/calib_images/*.jpg'  # for aruco
 
     '''
     Set Aruco parameters
     '''
+
     def configure_aruco(self):
         # termination criteria
         criteria = (cv2.TERM_CRITERIA_EPS +
@@ -66,6 +79,7 @@ class PoseEstimator():
     '''
     Camera calibration for aruco
     '''
+
     def calibrate_camera(self, objp, criteria):
         # Arrays to store object points and image points from all the images.
         objpoints = []  # 3d point in real world space
@@ -96,8 +110,8 @@ class PoseEstimator():
         return mtx, dist
 
     def aruco_tracking(self, image, mtx, dist, rectangle_corners):
-        
-        #print(rectangle_corners)
+
+        # print(rectangle_corners)
         # Rectangle Coordinates
         if rectangle_corners is not None:
             RectTopLeftX = rectangle_corners[0][0]
@@ -113,7 +127,8 @@ class PoseEstimator():
             parameters = aruco.DetectorParameters_create()
 
             # lists of ids and the corners beloning to each id
-            corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+            corners, ids, rejectedImgPoints = aruco.detectMarkers(
+                gray, aruco_dict, parameters=parameters)
 
             '''
             print("#####################")
@@ -197,6 +212,21 @@ class PoseEstimator():
         distance = sqrt((pow(x2-x1, 2)+pow(y2-y1, 2)))
 
         return distance
+
+    '''
+    Compute the linear distance of shoulders of one person
+    Param: dictionary of key body joints
+    Return: real length between person shoulders
+    '''
+    def compute_shoulder_length_for_one(self, body_measurements):
+        shoulder_len = None
+        if body_measurements.get("L-shoulder") and body_measurements.get("R-shoulder"):
+            
+            rShoulder = body_measurements["R-shoulder"]
+            lShoulder = body_measurements["L-shoulder"]
+
+            shoulder_len = self.PIXEL_TO_DIST*(self._compute_euclid_dist(rShoulder[0], rShoulder[1], lShoulder[0], lShoulder[1]))
+        return shoulder_len
 
     '''
     Compute the linear distance of arms of one person
@@ -302,31 +332,72 @@ class PoseEstimator():
         vec_1 = p1 - p0
         vec_2 = p2 - p0
 
-        angle = np.arccos(np.dot(vec_1, vec_2) / (np.linalg.norm(vec_1)*np.linalg.norm(vec_2)))
+        angle = np.arccos(np.dot(vec_1, vec_2) /
+                          (np.linalg.norm(vec_1)*np.linalg.norm(vec_2)))
         return angle
 
     def draw_angled_rec(self, x0, y0, width, height, angle, img):
-
+        rectangle_corners = None
         _angle = angle * pi / 180.0
         b = cos(_angle) * 0.5
         a = sin(_angle) * 0.5
         try:
             pt0 = (int(x0 - a * height - b * width),
-                int(y0 + b * height - a * width))
+                   int(y0 + b * height - a * width))
             pt1 = (int(x0 + a * height - b * width),
-                int(y0 - b * height - a * width))
+                   int(y0 - b * height - a * width))
             pt2 = (int(2 * x0 - pt0[0]), int(2 * y0 - pt0[1]))
             pt3 = (int(2 * x0 - pt1[0]), int(2 * y0 - pt1[1]))
 
             rectangle_corners = (pt1, pt3)
 
-            cv2.line(img, pt0, pt1, (255, 255, 255), 2)
-            cv2.line(img, pt1, pt2, (255, 255, 255), 2)
-            cv2.line(img, pt2, pt3, (255, 255, 255), 2)
-            cv2.line(img, pt3, pt0, (255, 255, 255), 2)
+            # draw horizontal
+            centre_point_left = (int((pt0[0] + pt1[0]) * 0.5), int((pt0[1] + pt1[1]) * 0.5))
+            centre_point_right = (int((pt2[0] + pt3[0]) * 0.5), int((pt2[1] + pt3[1]) * 0.5))
+            
+            cv2.line(img, centre_point_left, centre_point_right, (255, 255, 255), 2)
+
+            #draw vertical
+            centre_point_top = (int((pt0[0] + pt3[0]) * 0.5), int((pt0[1] + pt3[1]) * 0.5))
+            centre_point_bot = (int((pt2[0] + pt1[0]) * 0.5), int((pt2[1] + pt1[1]) * 0.5))
+            
+            cv2.line(img, centre_point_top, centre_point_bot, (255, 255, 255), 2)
+
+            #cv2.line(img, pt0, pt1, (255, 255, 255), 2)
+            #cv2.line(img, pt1, pt2, (255, 255, 255), 2)
+            #cv2.line(img, pt2, pt3, (255, 255, 255), 2)
+            #cv2.line(img, pt3, pt0, (255, 255, 255), 2)
         except:
             return img, None
 
+        return img, rectangle_corners
+
+    def draw_measure_area_neck(self, body_measurements, img):
+        rectangle_corners = None
+        if body_measurements.get("neck") and body_measurements.get("R-shoulder") and img is not None:
+
+            neck = body_measurements["neck"]
+            rShoulder = body_measurements["R-shoulder"]
+
+            neck_shoulder_length = self._compute_euclid_dist(
+                neck[0], neck[1], rShoulder[0], rShoulder[1])
+
+            img, rectangle_corners = self.draw_angled_rec(
+                neck[0], neck[1]*0.9, neck_shoulder_length*0.6, neck_shoulder_length*0.6, 0, img)
+        return img, rectangle_corners
+
+    def draw_measure_area_chest(self, body_measurements, img):
+        rectangle_corners = None
+        if body_measurements.get("neck") and body_measurements.get("R-shoulder") and img is not None:
+
+            neck = body_measurements["neck"]
+            rShoulder = body_measurements["R-shoulder"]
+
+            neck_shoulder_length = self._compute_euclid_dist(
+                neck[0], neck[1], rShoulder[0], rShoulder[1])
+
+            img, rectangle_corners = self.draw_angled_rec(
+                neck[0], neck[1]+neck_shoulder_length*0.5, neck_shoulder_length*0.6, neck_shoulder_length*0.6, 0, img)
         return img, rectangle_corners
 
     '''
@@ -360,34 +431,76 @@ class PoseEstimator():
 
         return (left_leg_length, right_leg_length)
 
-    def is_tracker_in_pose_rect(self, tracker_coord, pose_rect_corners):
-        if tracker_coord is None or pose_rect_corners is None:
-            return False
-        return 
+    def draw_body_outline(self, image):
+        body_outline_img = cv2.imread(self.BODY_OUTLINE_IMAGE, -1)
+        body_outline_img = cv2.resize(body_outline_img, (0, 0), fx=0.7, fy=0.7)
+        x_offset = 100
+        y_offset = 60
+        y1, y2 = y_offset, y_offset + body_outline_img.shape[0]
+        x1, x2 = x_offset, x_offset + body_outline_img.shape[1]
 
-    def csrt_tracking(self, frame, initBB):    
+        alpha_s = body_outline_img[:, :, 3] / 255.0
+        alpha_l = 1.0 - alpha_s
+
+        for c in range(0, 3):
+            image[y1:y2, x1:x2, c] = (alpha_s * body_outline_img[:, :, c] +
+                                    alpha_l * image[y1:y2, x1:x2, c])
+
+        return image
+
+    def is_tracker_in_pose_rect(self, tracker_coord, pose_rect_corners):
         
+        isTrackerInRightPlace = False
+
+        if tracker_coord is None or pose_rect_corners is None:
+            return isTrackerInRightPlace
+        
+        top_left_rect = pose_rect_corners[0]
+        bot_right_rect = pose_rect_corners[1]
+
+        top_left_tracker = (tracker_coord[0], tracker_coord[1])
+        bot_right_tracker = (tracker_coord[0] + tracker_coord[2], tracker_coord[1] + tracker_coord[3])
+
+        tracker_centre = ((top_left_tracker[0]+bot_right_tracker[0])*0.5, (top_left_tracker[1]+bot_right_tracker[1])*0.5)
+
+        if top_left_rect[0] < tracker_centre[0] and top_left_rect[1] < tracker_centre[1] \
+            and bot_right_rect[0] > tracker_centre[0] and bot_right_rect[1] > tracker_centre[1]:
+            isTrackerInRightPlace = True
+
+        #if top_left_rect[0] < top_left_tracker[0] and top_left_rect[1] < top_left_tracker[1] \
+        #    and bot_right_rect[0] > bot_right_tracker[0] and bot_right_rect[1] > bot_right_tracker[1]:
+        #    isTrackerInRightPlace = True
+        
+        return isTrackerInRightPlace
+
+    def csrt_tracking(self, frame, initBB, isTrackerInRightPlace):
+
         if initBB is not None:
             # grab the new bounding box coordinates of the object
             (success, box) = self.tracker.update(frame)
-            #print(box)
+            # print(box)
 
             tracker_coord = None
 
             # check to see if the tracking was a success
-            if success:
+            if success and isTrackerInRightPlace:
                 (x, y, w, h) = [int(v) for v in box]
                 cv2.rectangle(frame, (x, y), (x + w, y + h),
-                            (0, 255, 0), 2)
-                tracker_coord = (x,y,w,h)
+                              (0, 255, 0), 2)
+                tracker_coord = (x, y, w, h)
+            elif success and not isTrackerInRightPlace:
+                (x, y, w, h) = [int(v) for v in box]
+                cv2.rectangle(frame, (x, y), (x + w, y + h),
+                              (0, 0, 255), 2)
+                tracker_coord = (x, y, w, h)
 
             # initialize the set of information we'll be displaying on
             # the frame
             info = [
-                ("Tracker", "MIL"),
+                ("Tracker", "CSRT"),
                 ("Success", "Yes" if success else "No"),
             ]
-            
+
             '''
             # loop over the info tuples and draw them on our frame
             for (i, (k, v)) in enumerate(info):
@@ -397,19 +510,27 @@ class PoseEstimator():
             '''
         return frame, tracker_coord
 
+    # state management
+
+    def state_next(self):
+        self.state_manager.next()
+        self.state = self.state_manager.get_current_state()
+
+    def state_reset(self):
+        self.state_manager.reset()
+        self.state = self.state_manager.get_current_state()
+        self.initBB = None  # TODO REMOVE with auto detection
+
     def configure_tracker(self, bb):
-        # kcf tracker setup
-        #self.tracker = cv2.TrackerMIL_create()
+        # csrt tracker setup
         if self.trackerHasStarted:
             self.tracker = None
-            print()
             self.tracker = cv2.TrackerCSRT_create()
             self.initBB = (bb[0], bb[1], bb[2], bb[3])
             self.trackerHasStarted = False
         else:
             self.initBB = (bb[0], bb[1], bb[2], bb[3])
-        #print(self.initBB)
-
+        
     # Main functions
     def configure(self):
         #self.cam = cv2.VideoCapture(self.cam_id)
@@ -424,13 +545,14 @@ class PoseEstimator():
         self.tracker = cv2.TrackerCSRT_create()
 
         if self.width == 0 or self.height == 0:
-            self.model = TfPoseEstimator(get_graph_path(self.model_type), target_size=(432, 368))
+            self.model = TfPoseEstimator(get_graph_path(
+                self.model_type), target_size=(432, 368))
         else:
-            self.model = TfPoseEstimator(get_graph_path(self.model_type), target_size=(self.width, self.height))
+            self.model = TfPoseEstimator(get_graph_path(
+                self.model_type), target_size=(self.width, self.height))
 
         #print("YAY Config was done")
         #print(self.mtx, self.dist, self.width, self.height)
-
 
     def predict(self, orig_image):
         #ret_val, orig_image = self.cam.read()
@@ -442,11 +564,24 @@ class PoseEstimator():
         # t = time.time()
         image_with_lines = orig_image.copy()
         image = orig_image.copy()
-        humans = self.model.inference(image_with_lines, resize_to_default=(self.width > 0 and self.height > 0), upsample_size=self.resize_out_ratio)
+        measurements = None
+        if self.state is ALL_STATES[1]:
+            humans = self.model.inference(image, resize_to_default=(
+                self.width > 0 and self.height > 0), upsample_size=self.resize_out_ratio)
+
+            image, body_coordinates = TfPoseEstimator.draw_humans(
+                image, humans, imgcopy=False)
+            image = self.draw_body_outline(image)
+
+        else:
+            humans = self.model.inference(image_with_lines, resize_to_default=(
+                self.width > 0 and self.height > 0), upsample_size=self.resize_out_ratio)
+
+            image_with_lines, body_coordinates = TfPoseEstimator.draw_humans(
+                image_with_lines, humans, imgcopy=False)
+
         # elapsed = (time.time() - t)/runs
         # logger.info('inference image: %s in %.4f seconds.' % (args.image, elapsed))
-
-        image_with_lines, body_coordinates = TfPoseEstimator.draw_humans(image_with_lines, humans, imgcopy=False)
         pose_rect_corners = None
         tracker_coord = None
         arm_lengths_all = []
@@ -456,35 +591,61 @@ class PoseEstimator():
             each_human_coordinates = {}
             for part_id in range(18):
                 if body_coordinates[human].get(part_id):
-                    each_human_coordinates[self.body_mapping[part_id]] = body_coordinates[human][part_id]
+                    each_human_coordinates[self.body_mapping[part_id]
+                                           ] = body_coordinates[human][part_id]
 
             # Compute arm measurements for each person
-            person_arm_lengths = self.compute_arm_length_for_one(each_human_coordinates)
+            person_arm_lengths = self.compute_arm_length_for_one(
+                each_human_coordinates)
             if person_arm_lengths[0] is not None and person_arm_lengths[1] is not None:
                 arm_lengths_all.append(person_arm_lengths)
             else:
                 arm_lengths_all.append(None)
+            # Get linear measurements
+            if self.state is ALL_STATES[1]:
+                left_arm_len, right_arm_len = self.compute_arm_length_for_one(each_human_coordinates)
+                shoulder_len = self.compute_shoulder_length_for_one(each_human_coordinates)
+                measurements = {}
+                measurements["shoulder"] = shoulder_len
+                measurements["left-arm"] = left_arm_len
+                measurements["right-arm"] = right_arm_len
 
-            # Find centre of left arm and right arm
-            left_centre = self.compute_arm_centre_left(each_human_coordinates)
-            right_centre = self.compute_arm_centre_right(each_human_coordinates)
 
-            #print(left_centre)
+            # Find centre of left arm
+            if self.state is ALL_STATES[2]:
+                left_centre = self.compute_arm_centre_left(
+                    each_human_coordinates)
+                left_arm_angle = self.compute_angle_of_left_arm(
+                    each_human_coordinates)
 
-            left_arm_angle = self.compute_angle_of_left_arm(each_human_coordinates)
-            right_arm_angle = self.compute_angle_of_right_arm(each_human_coordinates)
+                # draw angled rectangle on left arm
+                # TODO fix angle
+                if left_centre is not None:
+                    image, pose_rect_corners = self.draw_angled_rec(
+                        left_centre[0], left_centre[1], 20, 20, left_arm_angle, image)
 
-            # draw angled rectangle on left arm
-            # TODO fix angle
-            if left_centre is not None:
-                image, pose_rect_corners = self.draw_angled_rec(
-                    left_centre[0], left_centre[1], 50, 50, left_arm_angle, image)
+            # Find centre of right arm
+            if self.state is ALL_STATES[3]:
+                right_centre = self.compute_arm_centre_right(
+                    each_human_coordinates)
+                right_arm_angle = self.compute_angle_of_right_arm(
+                    each_human_coordinates)
 
-            # draw angled rectangle on right arm
-            # TODO fix angle
-            if right_centre is not None:
-                image, pose_rect_corners = self.draw_angled_rec(
-                    right_centre[0], right_centre[1], 50, 50, right_arm_angle, image)
+                # draw angled rectangle on right arm
+                # TODO fix angle
+                if right_centre is not None:
+                    image, pose_rect_corners = self.draw_angled_rec(
+                        right_centre[0], right_centre[1], 20, 20, right_arm_angle, image)
+
+            # draw measuring box for neck
+            if self.state is ALL_STATES[4]:
+                image, pose_rect_corners = self.draw_measure_area_neck(
+                    each_human_coordinates, image)
+
+            # draw measuring box for chest
+            if self.state is ALL_STATES[5]:
+                image, pose_rect_corners = self.draw_measure_area_chest(
+                    each_human_coordinates, image)
 
             #print("Image shape: " + str(image.shape))
 
@@ -493,17 +654,17 @@ class PoseEstimator():
         if not self.trackerHasStarted and self.initBB is not None:
             self.tracker.init(image, self.initBB)
             self.trackerHasStarted = True
-        
-        if self.trackerHasStarted and self.initBB is not None:
-            image, tracker_coord = self.csrt_tracking(image, self.initBB)
+            
+        if self.trackerHasStarted and self.initBB is not None and self.state not in AUTO_STEPS:
+            image, tracker_coord = self.csrt_tracking(image, self.initBB, self.isTrackerInRightPlace)
 
-        isTrackerInRightPlace = self.is_tracker_in_pose_rect(tracker_coord, pose_rect_corners)
+            self.isTrackerInRightPlace = self.is_tracker_in_pose_rect(
+                tracker_coord, pose_rect_corners)
         # Print measurements to screen
         #print("Arm measurements for each person (Left, Right):")
-        #print(arm_lengths_all)
+        # print(arm_lengths_all)
         # print("Leg measurements for each person (Left, Right):")
         # print(leg_lengths_all)
-
         logger.debug('show+')
         cv2.putText(image,
                     "FPS: %f" % (1.0 / (time.time() - self.fps_time)),
@@ -511,11 +672,11 @@ class PoseEstimator():
                     (0, 255, 0), 2)
         #cv2.imshow('tf-pose-estimation result', image)
         self.fps_time = time.time()
-        #cv2.waitKey(1)
-        #if cv2.waitKey(1) == 27:
+        # cv2.waitKey(1)
+        # if cv2.waitKey(1) == 27:
         #    break
         logger.debug('finished+')
-        return image
+        return image, measurements
 
     '''
     if __name__ == '__main__':

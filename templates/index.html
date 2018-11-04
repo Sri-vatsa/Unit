@@ -304,6 +304,12 @@
                     <!--<p style="clear: both">-->
                     <!-- <video autoplay="true" id="videoElement"></video> -->
                     <img id="video" src="{{ url_for('video_feed') }}" alt="vid" class="center" style="display: None">
+                    <h3 id="reference-state" style="display: None" align=center>Place tape in the box</h3>
+                    <h3 id="linear-measurement-state" style="display: None" align=center>Please stand still with your hands by your side</h3>
+                    <h3 id="left-arm-state" style="display: None" align=center>Measure the left bicep</h3>
+                    <h3 id="right-arm-state" style="display: None" align=center>Measure the right bicep</h3>
+                    <h3 id="neck-state" style="display: None" align=center>Measure the neck circumference</h3>
+                    <h3 id="chest-state" style="display: None" align=center>Measure the chest circumference</h3>
 
                     <form>
                         <button id="start" class="btn btn-blue btn-fill-vert" type="button">Start</button>
@@ -314,17 +320,22 @@
                         <button id="readings" class="btn btn-navy btn-fill-vert" type="button" onclick="getReading()"
                             style="display: None">Get Readings</button>
                         <!--<input id="restart" class="contact100-form-btn" type="button" value="Restart" style="display: None">-->
+                        <button id="next" class="btn btn-blue btn-fill-vert" type="button" style="display: None">Next</button>
+                        <!--<input id="restart" class="contact100-form-btn" type="button" value="Restart" style="display: None">-->
                         <button id="restart" class="btn btn-orange btn-fill-vert" type="button" style="display: None">Restart</button>
                     </form>
+                    <!--
                     <form action="submit">
                         <input type="text" name="height" id="height_input" default="Input height here(cm)" style="display: None">
 
-                        <!--<input id="height_submit" class="contact100-form-btn" type="button" value="Submit" style="display: None">-->
+                        <!--<input id="height_submit" class="contact100-form-btn" type="button" value="Submit" style="display: None">--
                         <button id="height_submit" class="btn btn-green btn-fill-vert" type="button" style="display: None">Submit</button>
-                    </form>
+                    </form>-->
                 </div>
                 <div style="text-align: center">
                     <h4 id="start_text">Click start to begin</h4>
+                    <h4 id="start_again_text" style="display: None"> Congratulations! You have completed another round of measurement training</h4>
+                    <h4 id="start_again_text_2" style="display: None"> Click start to try again</h4>
                     <h3 id="measurement_heading" style="display: None">Latest Reading(s):</h3>
                     <table id="measurements" align=center style="display: None">
                         <tr>
@@ -332,8 +343,32 @@
                             <th>Measurement (cm)</th>
                         </tr>
                         <tr>
-                            <td>Arms</td>
-                            <td id=measurement_data></td>
+                            <td>Left Arm Length</td>
+                            <td id=left_arm_data></td>
+                        </tr>
+                        <tr>
+                            <td>Right Arm Length</td>
+                            <td id=right_arm_data></td>
+                        </tr>
+                        <tr>
+                            <td>Shoulder Width</td>
+                            <td id=shoulder_data></td>
+                        </tr>
+                        <tr>
+                            <td>Left Bicep Circumference</td>
+                            <td id=left_bicep_data></td>
+                        </tr>
+                        <tr>
+                            <td>Right Bicep Circumference</td>
+                            <td id=right_bicep_data></td>
+                        </tr>
+                        <tr>
+                            <td>Neck Circumference</td>
+                            <td id=neck_data></td>
+                        </tr>
+                        <tr>
+                            <td>Chest Circumference</td>
+                            <td id=chest_data></td>
                         </tr>
                     </table>
 
@@ -413,11 +448,13 @@
 
                 var x_top_left = e.pageX - posX,
                     y_top_left = e.pageY - posY,
-                    x_bot_right = 80,
-                    y_bot_right = 80
+                    x_bot_right = 40,
+                    y_bot_right = 40
                 console.log(x_top_left, y_top_left, x_bot_right, y_bot_right);
 
-                data = {"bb": JSON.stringify([x_top_left, y_top_left, x_bot_right, y_bot_right])};
+                data = {
+                    "bb": JSON.stringify([x_top_left, y_top_left, x_bot_right, y_bot_right])
+                };
                 $.ajax({
                     url: 'configure_tracker',
                     type: 'POST',
@@ -472,28 +509,100 @@
         </script>
 
         <script>
+            var states = ["#reference-state", "#linear-measurement-state", "#left-arm-state", "#right-arm-state", "#neck-state", "#chest-state"]
+            var data_ids = ["#left_arm_data", "#right_arm_data", "#shoulder_data", "#left_bicep_data", "#right_bicep_data", "#neck_data","#chest_data"]
+            var cur_id = 3
+            var count = 0
+            var isReadingSet = false
             $("#start").click(function () {
                 $("#restart").show();
                 $("#end").show();
                 $("#start").hide();
                 $("#readings").show();
+                $("#next").show();
                 $("#video").show();
-                $("#height_input").show();
-                $("#height_submit").show();
+                count = 0
+                cur_id = 2
+                $(states[count]).show();
+                //$("#height_input").show();
+                //$("#height_submit").show();
 
                 $("#measurement_heading").show();
                 $("#measurements").show();
                 $("#start_text").hide();
+                $("#start_again_text").hide();
+                $("#start_again_text_2").hide();
+                recognition.start();
+
+                for(i = 0; i < 7; i++) {
+                    $(data_ids[i]).html(null)
+                }
             });
 
             $("#restart").click(function () {
-                $("#height_input").show();
-                $("#height_submit").show();
+                //$("#height_input").show();
+                //$("#height_submit").show();
+                $("#next").show();
+                $(states[count]).hide();
+                count = 0;
+                cur_id = 2;
+                $(states[count]).show();
+                data = {
+                    "action": "restart"
+                };
+
+                for(i = 0; i < 7; i++) {
+                    $(data_ids[i]).html(null)
+                }
+                $.ajax({
+                    url: 'reset',
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    async: true,
+                    success: function (response) {
+                        console.log(response);
+                        $('#video').html();
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
             });
 
-            $("#height_submit").click(function () {
+            /*$("#height_submit").click(function () {
                 $("#height_input").hide();
                 $("#height_submit").hide();
+            });*/
+
+            $("#next").click(function () {
+                $(states[count]).hide();
+                count = count + 1
+                $(states[count]).show();
+                data = {
+                    "action": "next_state"
+                };
+                $.ajax({
+                    url: 'next',
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    async: true,
+                    success: function (response) {
+                        var state = response.responseText
+                        console.log(state)
+                        if (state === "chest") {
+                            $('#next').hide()
+                        };
+                        $('#video').html();
+                    },
+                    error: function (error) {
+                        if (error.responseText === "chest") {
+                            $('#next').hide()
+                        };
+                        console.log(error);
+                    }
+                })
             });
 
             $("#end").click(function () {
@@ -501,16 +610,36 @@
                 $("#end").hide();
                 $("#start").show();
                 $("#readings").hide();
+                $("#next").hide();
                 $("#video").hide();
-                $("#height_input").hide();
-                $("#height_submit").hide();
+                $(states[count]).hide();
+                //$("#height_input").hide();
+                //$("#height_submit").hide();
 
                 $("#measurement_heading").hide();
                 $("#measurements").hide();
-                $("#start_text").show();
+                $("#start_again_text").show();
+                $("#start_again_text_2").show();
+
+                data = {
+                    "action": "end"
+                };
+                $.ajax({
+                    url: 'reset',
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json',
+                    success: function (response) {
+                        console.log(response);
+                        $('#video').html();
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+
             });
-        </script>
-        <script>
+
             var el = document.getElementById('readings');
             el.addEventListener('click', getReading);
 
@@ -521,16 +650,100 @@
                     type: 'POST',
                     dataType: 'json',
                     success: function (response) {
-                        var html_str = response;
-                        $('#measurement_data').html(html_str);
+                        var html_str = response["data"];
+                        console.log(response["left-arm"])
+                        if(!isReadingSet) {
+                            $("#left_arm_data").html(response[0]["left-arm"]);
+                            $("#right_arm_data").html(response[0]["right-arm"]);
+                            $("#shoulder_data").html(response[0]["shoulder"]);
+                            isReadingSet = true
+                        } else {
+                            $(data_ids[cur_id]).html(html_str);
+                        }
                         console.log(response);
                     },
                     error: function (error) {
                         console.log(error);
                     }
                 });
+                if(isReadingSet){
+                    cur_id = cur_id + 1;
+                }
+                if (cur_id > 7) {
+                    cur_id = 3
+                }
+            }
+
+        </script>
+
+        <script>
+
+            document.addEventListener('click', ({ target }) => {
+            if (!target.matches('button')) return;
+                console.log('Click detected: ' + target.outerHTML);
+            });
+            var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+            var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
+            var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
+
+
+            var buttonNames = ['None', 'start', 'stop', 'measure', 'next', 'reset'];
+
+            var recognition = new SpeechRecognition();
+            recognition.continuous = true;
+
+            $('#start').onclick = function(e) {
+                if (e.target.matches('button')) return;
+                recognition.stop();
+                recognition.start();
+                console.log('Listening');
+            }
+
+            recognition.onresult = function(event) {
+                var last = event.results.length - 1;
+                var speechText = event.results[last][0].transcript;
+                console.log('Heard ' + speechText);
+                const foundButtonIndex = buttonNames.findIndex(buttonName => buttonName === speechText.trim());
+                console.log(buttonNames);
+                console.log(foundButtonIndex);
+                if (foundButtonIndex !== -1) {
+                    document.querySelectorAll('button')[foundButtonIndex].click();
+                }
+            }
+
+            recognition.onspeechend = function() {
+                recognition.stop();
+                recognition.start();
+            }
+            
+            recognition.onsoundend = function() {
+                recognition.stop();
+                recognition.start();
+            }
+            
+            recognition.onaudioend = function() {
+                recognition.stop();
+                recognition.start();
+            }
+
+            recognition.onend = function() {
+                recognition.stop();
+                recognition.start();
+            }
+
+            recognition.onnomatch = function(event) {
+                recognition.stop();
+                recognition.start();
+                console.log('Not recognized')
+            }
+
+            recognition.onerror = function(event) {
+                recognition.stop();
+                recognition.start();
+                console.log('Error ' + event.error);
             }
         </script>
+
         <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
         <script src="{{ url_for('static', filename='js/smoothscroll.js') }}"></script>
         <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
