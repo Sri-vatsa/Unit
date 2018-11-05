@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en"></html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+</head>
+
+<body>
+
+    <canvas id="bar-chart" width="800" height="450"></canvas>
+    
+</body>
+
+
+<script>
+//  Bar Chart
+new Chart(document.getElementById("bar-chart"), {
+    type: 'bar',
+    data: {
+      labels: ["Neck", "Chest", "Shoulder", "Left Arm", "Right Arm", "Left Bicep", "Right Bicep"],
+      datasets: [
+        {
+          label: "Points",
+          backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+          data: [66,78,73,84, 79, 95,81]
+        }
+      ]
+    },
+    options: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Score for Various Measurements'
+      }
+    }
+});
+</script>

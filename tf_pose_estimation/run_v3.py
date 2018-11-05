@@ -55,9 +55,10 @@ class PoseEstimator():
                              "R-hip", "R-knee", "R-ankle", "L-hip", "L-knee", "L-ankle", "L-eye", "R-eye", "L-ear", "R-ear"]
 
         # represents the equivalent of 1 pixel in real distance (cm)
-        self.PIXEL_TO_DIST = 170.0/350
+        self.PIXEL_TO_DIST_SHOULDER = 16.0/50
+        self.PIXEL_TO_DIST_ARM = 18.46/50
         self.fps_time = 0
-        self.BODY_OUTLINE_IMAGE = 'images/bodyoutline.png'
+        self.BODY_OUTLINE_IMAGE = 'images/Outline.png'
 
         self.CALIBRATION_IMAGES_PATH = 'tf_pose_estimation/calib_images/*.jpg'  # for aruco
 
@@ -225,7 +226,7 @@ class PoseEstimator():
             rShoulder = body_measurements["R-shoulder"]
             lShoulder = body_measurements["L-shoulder"]
 
-            shoulder_len = self.PIXEL_TO_DIST*(self._compute_euclid_dist(rShoulder[0], rShoulder[1], lShoulder[0], lShoulder[1]))
+            shoulder_len = self.PIXEL_TO_DIST_SHOULDER*(self._compute_euclid_dist(rShoulder[0], rShoulder[1], lShoulder[0], lShoulder[1]))
         return shoulder_len
 
     '''
@@ -245,7 +246,7 @@ class PoseEstimator():
             rElbow = body_measurements["R-elbow"]
             rWrist = body_measurements["R-wrist"]
 
-            right_arm_length = self.PIXEL_TO_DIST*(self._compute_euclid_dist(
+            right_arm_length = self.PIXEL_TO_DIST_ARM*(self._compute_euclid_dist(
                 rShoulder[0], rShoulder[1], rElbow[0], rElbow[1]) + self._compute_euclid_dist(rElbow[0], rElbow[1], rWrist[0], rWrist[1]))
 
         # compute the length of left arm
@@ -254,7 +255,7 @@ class PoseEstimator():
             lElbow = body_measurements["L-elbow"]
             lWrist = body_measurements["L-wrist"]
 
-            left_arm_length = self.PIXEL_TO_DIST*(self._compute_euclid_dist(
+            left_arm_length = self.PIXEL_TO_DIST_ARM*(self._compute_euclid_dist(
                 lShoulder[0], lShoulder[1], lElbow[0], lElbow[1]) + self._compute_euclid_dist(lElbow[0], lElbow[1], lWrist[0], lWrist[1]))
 
         return (left_arm_length, right_arm_length)
@@ -405,7 +406,7 @@ class PoseEstimator():
     Param: dictionary of key body joints
     Return: real length of person legs
     '''
-
+    '''
     def compute_leg_length_for_one(self, body_measurements):
 
         left_leg_length, right_leg_length = None, None
@@ -430,12 +431,13 @@ class PoseEstimator():
                 lHip[0], lHip[1], lKnee[0], lKnee[1]) + self._compute_euclid_dist(lKnee[0], lKnee[1], lAnkle[0], lAnkle[1]))
 
         return (left_leg_length, right_leg_length)
+    '''
 
     def draw_body_outline(self, image):
         body_outline_img = cv2.imread(self.BODY_OUTLINE_IMAGE, -1)
-        body_outline_img = cv2.resize(body_outline_img, (0, 0), fx=0.7, fy=0.7)
-        x_offset = 100
-        y_offset = 60
+        #body_outline_img = cv2.resize(body_outline_img, (0, 0), fx=0.7, fy=0.70)
+        x_offset = 0 #100
+        y_offset = 0 #30
         y1, y2 = y_offset, y_offset + body_outline_img.shape[0]
         x1, x2 = x_offset, x_offset + body_outline_img.shape[1]
 
@@ -622,7 +624,7 @@ class PoseEstimator():
                 # TODO fix angle
                 if left_centre is not None:
                     image, pose_rect_corners = self.draw_angled_rec(
-                        left_centre[0], left_centre[1], 20, 20, left_arm_angle, image)
+                        left_centre[0], left_centre[1], 30, 30, left_arm_angle, image)
 
             # Find centre of right arm
             if self.state is ALL_STATES[3]:
@@ -635,7 +637,7 @@ class PoseEstimator():
                 # TODO fix angle
                 if right_centre is not None:
                     image, pose_rect_corners = self.draw_angled_rec(
-                        right_centre[0], right_centre[1], 20, 20, right_arm_angle, image)
+                        right_centre[0], right_centre[1], 30, 30, right_arm_angle, image)
 
             # draw measuring box for neck
             if self.state is ALL_STATES[4]:

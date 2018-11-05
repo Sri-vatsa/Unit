@@ -11,7 +11,8 @@ class measurementSerialThread(threading.Thread):
       self.baudrate = 115200
     else:
       self.baudrate = baudrate
-    self.ser = serial.Serial("/dev/cu.usbmodem1411", self.baudrate)
+    self.ser = serial.Serial("COM3", self.baudrate) #/dev/cu.usbmodem1411
+    print(self.ser.name)
     #if port is None:
     #  self.ser.port = "/dev/cu.usbmodem1411" #"/dev/tty.usbserial-A6004amR"
     #else:
@@ -33,8 +34,8 @@ class measurementSerialThread(threading.Thread):
     
     dataIn = False
     while not self.stoprequest.isSet():
-      if not self.isOpen():
-        self.connectForStream()
+      #if not self.isOpen():
+      #  self.connectForStream()
       
       str_list = ["", ""]
       while self.keepAlive:

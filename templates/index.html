@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-style.css') }}">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 
 </head>
 
@@ -56,8 +57,8 @@
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="#home" class="smoothScroll"><b>Home</b></a></li>
                     <li><a href="#about" class="smoothScroll"><b>How it works</b></a></li>
-                    <li><a href="#team" class="smoothScroll"><b>Past Logs</b></a></li>
                     <li><a href="#webcam" class="smoothScroll"><b>Measure</b></a></li>
+                    <li><a href="#statistics" class="smoothScroll"><b>Performance</b></a></li>
                     <li><a href="#group" class="smoothScroll"><b>Team</b></a></li>
                 </ul>
             </div>
@@ -106,191 +107,6 @@
         </div>
     </section>
 
-
-    <!-- PROJECT -->
-    <section id="project" class="parallax-section">
-        <div class="container">
-            <div class="row">
-
-                <div class="col-md-6 col-sm-6">
-                    <!-- PROJECT ITEM -->
-                    <div class="project-item">
-                        <a href="{{ url_for('static',filename='images/measure1.png') }}" class="image-popup">
-                            <img src="{{ url_for('static',filename='images/measure1.png') }}" class="img-responsive"
-                                alt="">
-
-                            <div class="project-overlay">
-                                <div class="project-info">
-                                    <h1>Easy to use</h1>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-sm-6">
-                    <!-- PROJECT ITEM -->
-                    <div class="project-item">
-                        <a href="images/measure2.png" class="image-popup">
-                            <img src="images/measure2.png" class="img-responsive" alt="">
-
-                            <div class="project-overlay">
-                                <div class="project-info">
-                                    <h1>Just for you</h1>
-
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-sm-6">
-                    <!-- PROJECT ITEM -->
-                    <div class="project-item">
-                        <a href="images/measure3.png" class="image-popup">
-                            <img src="images/measure3.png" class="img-responsive" alt="">
-
-                            <div class="project-overlay">
-                                <div class="project-info">
-                                    <h1>Guided system</h1>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-sm-6">
-                    <!-- PROJECT ITEM -->
-                    <div class="project-item">
-                        <a href="images/measure4.png" class="image-popup">
-                            <img src="images/measure4.png" class="img-responsive" alt="">
-
-                            <div class="project-overlay">
-                                <div class="project-info">
-                                    <h1>No fuss</h1>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-
-    <!-- TEAM -->
-    <section id="team" class="parallax-section">
-        <div class="container">
-            <div class="row">
-
-                <div class="col-md-offset-2 col-md-8 col-sm-12">
-                    <div class="section-title">
-                        <hr width=30% align=center>
-                        <h2>Past measurements</h2>
-                    </div>
-                </div>
-
-                <div class="clearfix"></div>
-                <div class="horizontal">
-                    <div class="table">
-                        <article>
-                            <a href="#openModal">
-                                <h3>11 09 18 1455</h3>
-                            </a>
-                        </article>
-                        <article>
-                            <a href="#openModal">
-                                <h3>27 08 18 1143</h3>
-                            </a>
-                        </article>
-                        <article>
-                            <a href="#openModal">
-                                <h3>19 08 18 0935</h3>
-                            </a>
-                        </article>
-                        <article>
-                            <a href="#openModal">
-                                <h3>07 08 18 1902</h3>
-                            </a>
-                        </article>
-                        <!-- Repeat this part as many times as necessary. -->
-                    </div>
-                </div>
-
-
-
-                <!-- insert script for modal buttons here-->
-                <!--<a href="#openModal">11 September 2018, 4.55pm</a>-->
-
-                <div id="openModal" class="modalDialog">
-                    <div>
-                        <a href="#close" title="Close" class="close">X</a>
-                        <h2>MEASUREMENTS</h2>
-                        <p>Neck: -</p>
-                        <p>Shoulder: -</p>
-                        <p>Chest: -</p>
-                        <p>Waist: -</p>
-                        <p>Torso length: -</p>
-                        <p>Arm length: -</p>
-                    </div>
-                </div>
-
-
-
-                <!--<button class="trigger">29 August 2018, 3.44pm</button>
-               <div class="modal">
-                   <div class="modal-content">
-                       <span class="close-button">×</span>
-                       <h1>Measurements</h1>
-                       <p> Neck: </p>
-                   </div>
-               </div>-->
-
-
-
-                <!--   <div id="owl-team" class="owl-carousel">
-                    <div class="col-md-4 col-sm-4 item">
-                         <div class="measure-item" class="img-responsive" alt="">
-                           <p>Click and access past measurements</p>
-                         </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-4 item">
-                         <div class="measure-item">
-                            <p>9 September 2018, 6.44pm</p>
-                         </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-4 item">
-                         <div class="measure-item">
-                              <p>31 August 2018, 5.20pm</p>
-                         </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-4 item">
-                         <div class="measure-item">
-                              <p>19 August 2018, 2.15pm</p>
-                         </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-4 item">
-                         <div class="measure-item">
-                              <p>1 August 2018, 9.59pm</p>
-                         </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-4 item">
-                         <div class="measure-item">
-                              <p>29 July 2018, 7.37pm</p>
-                         </div>
-                    </div>
-               </div>-->
-            </div>
-        </div>
-    </section>
-
-
     <!-- Previously the was the section for query submission-->
     <!-- WEBCAM SECTION -->
     <!--html body for webcam-->
@@ -305,7 +121,8 @@
                     <!-- <video autoplay="true" id="videoElement"></video> -->
                     <img id="video" src="{{ url_for('video_feed') }}" alt="vid" class="center" style="display: None">
                     <h3 id="reference-state" style="display: None" align=center>Place tape in the box</h3>
-                    <h3 id="linear-measurement-state" style="display: None" align=center>Please stand still with your hands by your side</h3>
+                    <h3 id="linear-measurement-state" style="display: None" align=center>Please stand still with your
+                        hands by your side</h3>
                     <h3 id="left-arm-state" style="display: None" align=center>Measure the left bicep</h3>
                     <h3 id="right-arm-state" style="display: None" align=center>Measure the right bicep</h3>
                     <h3 id="neck-state" style="display: None" align=center>Measure the neck circumference</h3>
@@ -323,6 +140,8 @@
                         <button id="next" class="btn btn-blue btn-fill-vert" type="button" style="display: None">Next</button>
                         <!--<input id="restart" class="contact100-form-btn" type="button" value="Restart" style="display: None">-->
                         <button id="restart" class="btn btn-orange btn-fill-vert" type="button" style="display: None">Restart</button>
+                        <button id="audio" class="btn btn-green btn-fill-vert" type="button" style="display: None">Audio</button>
+
                     </form>
                     <!--
                     <form action="submit">
@@ -334,7 +153,8 @@
                 </div>
                 <div style="text-align: center">
                     <h4 id="start_text">Click start to begin</h4>
-                    <h4 id="start_again_text" style="display: None"> Congratulations! You have completed another round of measurement training</h4>
+                    <h4 id="start_again_text" style="display: None"> Congratulations! You have completed another round
+                        of measurement training</h4>
                     <h4 id="start_again_text_2" style="display: None"> Click start to try again</h4>
                     <h3 id="measurement_heading" style="display: None">Latest Reading(s):</h3>
                     <table id="measurements" align=center style="display: None">
@@ -383,92 +203,114 @@
         </video>
       </div>-->
         </div>
+    </div>
 
+    <!-- Graphs -->
+    <section id="statistics" class="parallax-section">
+        <div class="section-title">
+            <hr width=30% align=center>
+            <h2 align=center>Statistics</h2>
+        </div>
+        <div class="row">
+            <div class="col-md-2  col-sm-2"></div>
+            <div class="col-md-8 col-sm-8">
+                <canvas id="line-chart" width="800" height="450">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-sm-6">
+                <canvas id="radar-chart" width="400" height="300">
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <canvas id="radar-chart-2" width="400" height="300">
+            </div>
 
-        <!-- FOOTER -->
-        <footer id="group">
-            <div class="container">
-                <div class="row">
+        </div>
+    </section>
 
-                    <div class="col-md-offset-3 col-md-5 col-sm-6">
-                        <h2>IS325</h2>
-                        <p>Improving fit</p>
+    <!-- FOOTER -->
+    <footer id="group">
+        <div class="container">
+            <div class="row">
 
+                <div class="col-md-3 col-sm-12">
+                    <h2>IS325</h2>
+                    <p>Smart Sensing for M2M Tailoring</p>
 
-                    </div>
+                </div>
 
-                    <!--               <div class="col-md-4 col-sm-6">
+                <!--               <div class="col-md-4 col-sm-6">
                     <div class="footer-info">
                     	<h2>EG3301R</h2>
 
                     </div>
                </div>-->
 
-                    <div class="col-md-3 col-sm-12">
+                <div class="col-md-3 col-sm-12">
 
-                        <h2>Members</h2>
-                        <p><small>Atharv Joshi</small></p>
-                        <p><small>Harith Hakim</small></p>
-                        <p><small>Maxine Tan</small></p>
-                        <p><small>P Srivatsa</small></p>
-                        <!--<ul class="social-icon">
+                    <h2>Members</h2>
+                    <p><small>Atharv Joshi</small></p>
+                    <p><small>Harith Hakim</small></p>
+                    <p><small>Maxine Tan</small></p>
+                    <p><small>P Srivatsa</small></p>
+                    <!--<ul class="social-icon">
                          <li><a href="#" class="fa fa-twitter"></a></li>
                          <li><a href="#" class="fa fa-facebook"></a></li>
                          <li><a href="#" class="fa fa-instagram"></a></li>
                          <li><a href="#" class="fa fa-linkedin"></a></li>
                     </ul>-->
 
-                    </div>
-                    <!--
+                </div>
+                <!--
                <div class="col-md-12 col-sm-12">
                     <div class="copyright-text">
                          <p>Copyright © 2018 Company Name | Design: <a href="https://www.facebook.com/tooplate" target="_parent">Tooplate</a></p>
                     </div>
                </div>
             -->
-                </div>
             </div>
-        </footer>
+        </div>
+    </footer>
 
-        <!-- SCRIPTS -->
-        <!--
+    <!-- SCRIPTS -->
+    <!--
 <script>
     // You can also require other files to run in this process
     require('./renderer.js')
 </script>
 -->
-        <script>
-            var el = document.getElementById('video');
-            el.addEventListener('click', configureTracker);
+    <script>
+        var el = document.getElementById('video');
+        el.addEventListener('click', configureTracker);
 
-            function configureTracker(e) {
-                el.removeEventListener('click', configureTracker);
-                var posX = $(this).offset().left,
-                    posY = $(this).offset().top;
+        function configureTracker(e) {
+            el.removeEventListener('click', configureTracker);
+            var posX = $(this).offset().left,
+                posY = $(this).offset().top;
 
-                var x_top_left = e.pageX - posX,
-                    y_top_left = e.pageY - posY,
-                    x_bot_right = 40,
-                    y_bot_right = 40
-                console.log(x_top_left, y_top_left, x_bot_right, y_bot_right);
+            var x_top_left = e.pageX - posX,
+                y_top_left = e.pageY - posY,
+                x_bot_right = 40,
+                y_bot_right = 40
+            console.log(x_top_left, y_top_left, x_bot_right, y_bot_right);
 
-                data = {
-                    "bb": JSON.stringify([x_top_left, y_top_left, x_bot_right, y_bot_right])
-                };
-                $.ajax({
-                    url: 'configure_tracker',
-                    type: 'POST',
-                    data: data,
-                    dataType: 'json',
-                    success: function (response) {
-                        console.log(response);
-                        $('#video').html();
-                    },
-                    error: function (error) {
-                        console.log(error);
-                    }
-                });
-            }
+            data = {
+                "bb": JSON.stringify([x_top_left, y_top_left, x_bot_right, y_bot_right])
+            };
+            $.ajax({
+                url: 'configure_tracker',
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+                    $('#video').html();
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
             /*
             $('#video').click(function (e) {
                 $(this).attr('disabled', 'true');
@@ -506,254 +348,393 @@
                 alert((e.pageX - posX) + ' , ' + (e.pageY - posY));
             });
             */
-        </script>
+    </script>
 
-        <script>
-            var states = ["#reference-state", "#linear-measurement-state", "#left-arm-state", "#right-arm-state", "#neck-state", "#chest-state"]
-            var data_ids = ["#left_arm_data", "#right_arm_data", "#shoulder_data", "#left_bicep_data", "#right_bicep_data", "#neck_data","#chest_data"]
-            var cur_id = 3
-            var count = 0
-            var isReadingSet = false
-            $("#start").click(function () {
-                $("#restart").show();
-                $("#end").show();
-                $("#start").hide();
-                $("#readings").show();
-                $("#next").show();
-                $("#video").show();
-                count = 0
-                cur_id = 2
-                $(states[count]).show();
-                //$("#height_input").show();
-                //$("#height_submit").show();
+    <script>
+        var states = ["#reference-state", "#linear-measurement-state", "#left-arm-state", "#right-arm-state", "#neck-state", "#chest-state"]
+        var data_ids = ["#left_arm_data", "#right_arm_data", "#shoulder_data", "#left_bicep_data", "#right_bicep_data", "#neck_data", "#chest_data"]
+        var cur_id = 3
+        var count = 0
+        var isReadingSet = false
+        $("#start").click(function () {
+            $("#restart").show();
+            $("#end").show();
+            $("#start").hide();
+            $("#readings").show();
+            $("#next").show();
+            $("#video").show();
+            $("#audio").show();
+            count = 0
+            cur_id = 2
+            $(states[count]).show();
+            //$("#height_input").show();
+            //$("#height_submit").show();
 
-                $("#measurement_heading").show();
-                $("#measurements").show();
-                $("#start_text").hide();
-                $("#start_again_text").hide();
-                $("#start_again_text_2").hide();
-                recognition.start();
+            $("#measurement_heading").show();
+            $("#measurements").show();
+            $("#start_text").hide();
+            $("#start_again_text").hide();
+            $("#start_again_text_2").hide();
+            recognition.start();
 
-                for(i = 0; i < 7; i++) {
-                    $(data_ids[i]).html(null)
-                }
-            });
-
-            $("#restart").click(function () {
-                //$("#height_input").show();
-                //$("#height_submit").show();
-                $("#next").show();
-                $(states[count]).hide();
-                count = 0;
-                cur_id = 2;
-                $(states[count]).show();
-                data = {
-                    "action": "restart"
-                };
-
-                for(i = 0; i < 7; i++) {
-                    $(data_ids[i]).html(null)
-                }
-                $.ajax({
-                    url: 'reset',
-                    type: 'POST',
-                    data: data,
-                    dataType: 'json',
-                    async: true,
-                    success: function (response) {
-                        console.log(response);
-                        $('#video').html();
-                    },
-                    error: function (error) {
-                        console.log(error);
-                    }
-                });
-            });
-
-            /*$("#height_submit").click(function () {
-                $("#height_input").hide();
-                $("#height_submit").hide();
-            });*/
-
-            $("#next").click(function () {
-                $(states[count]).hide();
-                count = count + 1
-                $(states[count]).show();
-                data = {
-                    "action": "next_state"
-                };
-                $.ajax({
-                    url: 'next',
-                    type: 'POST',
-                    data: data,
-                    dataType: 'json',
-                    async: true,
-                    success: function (response) {
-                        var state = response.responseText
-                        console.log(state)
-                        if (state === "chest") {
-                            $('#next').hide()
-                        };
-                        $('#video').html();
-                    },
-                    error: function (error) {
-                        if (error.responseText === "chest") {
-                            $('#next').hide()
-                        };
-                        console.log(error);
-                    }
-                })
-            });
-
-            $("#end").click(function () {
-                $("#restart").hide();
-                $("#end").hide();
-                $("#start").show();
-                $("#readings").hide();
-                $("#next").hide();
-                $("#video").hide();
-                $(states[count]).hide();
-                //$("#height_input").hide();
-                //$("#height_submit").hide();
-
-                $("#measurement_heading").hide();
-                $("#measurements").hide();
-                $("#start_again_text").show();
-                $("#start_again_text_2").show();
-
-                data = {
-                    "action": "end"
-                };
-                $.ajax({
-                    url: 'reset',
-                    type: 'POST',
-                    data: data,
-                    dataType: 'json',
-                    success: function (response) {
-                        console.log(response);
-                        $('#video').html();
-                    },
-                    error: function (error) {
-                        console.log(error);
-                    }
-                });
-
-            });
-
-            var el = document.getElementById('readings');
-            el.addEventListener('click', getReading);
-
-            function getReading() {
-                el.removeEventListener('click', getReading);
-                $.ajax({
-                    url: 'get_readings',
-                    type: 'POST',
-                    dataType: 'json',
-                    success: function (response) {
-                        var html_str = response["data"];
-                        console.log(response["left-arm"])
-                        if(!isReadingSet) {
-                            $("#left_arm_data").html(response[0]["left-arm"]);
-                            $("#right_arm_data").html(response[0]["right-arm"]);
-                            $("#shoulder_data").html(response[0]["shoulder"]);
-                            isReadingSet = true
-                        } else {
-                            $(data_ids[cur_id]).html(html_str);
-                        }
-                        console.log(response);
-                    },
-                    error: function (error) {
-                        console.log(error);
-                    }
-                });
-                if(isReadingSet){
-                    cur_id = cur_id + 1;
-                }
-                if (cur_id > 7) {
-                    cur_id = 3
-                }
+            for (i = 0; i < 7; i++) {
+                $(data_ids[i]).html(null)
             }
+        });
 
-        </script>
+        $("#restart").click(function () {
+            //$("#height_input").show();
+            //$("#height_submit").show();
+            $("#next").show();
+            $(states[count]).hide();
+            count = 0;
+            cur_id = 2;
+            $(states[count]).show();
+            data = {
+                "action": "restart"
+            };
 
-        <script>
+            for (i = 0; i < 7; i++) {
+                $(data_ids[i]).html(null)
+            }
+            $.ajax({
+                url: 'reset',
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                async: true,
+                success: function (response) {
+                    console.log(response);
+                    $('#video').html();
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
 
-            document.addEventListener('click', ({ target }) => {
+        /*$("#height_submit").click(function () {
+            $("#height_input").hide();
+            $("#height_submit").hide();
+        });*/
+
+        $("#next").click(function () {
+            $(states[count]).hide();
+            count = count + 1
+            $(states[count]).show();
+            data = {
+                "action": "next_state"
+            };
+            $.ajax({
+                url: 'next',
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                async: true,
+                success: function (response) {
+                    var state = response.responseText
+                    console.log(state)
+                    if (state === "chest") {
+                        $('#next').hide()
+                    };
+                    $('#video').html();
+                },
+                error: function (error) {
+                    if (error.responseText === "chest") {
+                        $('#next').hide()
+                    };
+                    console.log(error);
+                }
+            })
+        });
+
+        $("#end").click(function () {
+            $("#restart").hide();
+            $("#end").hide();
+            $("#start").show();
+            $("#readings").hide();
+            $("#next").hide();
+            $("#video").hide();
+            $("#audio").hide();
+            $(states[count]).hide();
+            //$("#height_input").hide();
+            //$("#height_submit").hide();
+
+            $("#measurement_heading").hide();
+            $("#measurements").hide();
+            $("#start_again_text").show();
+            $("#start_again_text_2").show();
+
+            data = {
+                "action": "end"
+            };
+            $.ajax({
+                url: 'reset',
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+                    $('#video').html();
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+        });
+
+        var el = document.getElementById('readings');
+        el.addEventListener('click', getReading);
+
+        function getReading() {
+            el.removeEventListener('click', getReading);
+            $.ajax({
+                url: 'get_readings',
+                type: 'POST',
+                dataType: 'json',
+                success: function (response) {
+                    var html_str = response["data"];
+                    console.log(response["left-arm"])
+                    if (!isReadingSet) {
+                        $("#left_arm_data").html(response[0]["left-arm"]);
+                        $("#right_arm_data").html(response[0]["right-arm"]);
+                        $("#shoulder_data").html(response[0]["shoulder"]);
+                        isReadingSet = true
+                    } else {
+                        $(data_ids[cur_id]).html(html_str);
+                    }
+                    console.log(response);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+            if (isReadingSet) {
+                cur_id = cur_id + 1;
+            }
+            if (cur_id > 7) {
+                cur_id = 3
+            }
+        }
+
+    </script>
+
+    <script>
+        var x = setInterval(function () {
+            console.log("POSTING")
+            check_ref()
+        }, 3000);
+
+        function check_ref() {
+            $.ajax({
+                url: 'check_reference',
+                type: 'POST',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+                    if (response["bool"]) {
+                        clearInterval(x);
+                        nextBtnIndex = 4;
+                        document.querySelectorAll('button')[nextBtnIndex].click();
+                    }
+                    $('#video').html();
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+    </script>
+
+    <script>
+
+        document.addEventListener('click', ({ target }) => {
             if (!target.matches('button')) return;
-                console.log('Click detected: ' + target.outerHTML);
-            });
-            var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-            var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
-            var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
+            console.log('Click detected: ' + target.outerHTML);
+        });
+        var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+        var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
+        var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
 
 
-            var buttonNames = ['None', 'start', 'stop', 'measure', 'next', 'reset'];
+        var buttonNames = ['None', 'hello', 'stop', 'okay', 'next', 'reset'];
 
-            var recognition = new SpeechRecognition();
-            recognition.continuous = true;
+        var recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        //recognition.interimResults = true;
 
-            $('#start').onclick = function(e) {
-                if (e.target.matches('button')) return;
-                recognition.stop();
-                recognition.start();
-                console.log('Listening');
+        $('#start').onclick = function (e) {
+            //if (e.target.matches('button')) return;
+            //recognition.stop();
+            recognition.start();
+            console.log('Listening');
+        }
+
+        $('#audio').onclick = function (e) {
+            //if (e.target.matches('button')) return;
+            //recognition.stop();
+            recognition.start();
+            console.log('Listening');
+        }
+
+        recognition.onresult = function (event) {
+            var last = event.results.length - 1;
+            var speechText = event.results[last][0].transcript;
+            console.log('Heard ' + speechText);
+            const foundButtonIndex = buttonNames.findIndex(buttonName => buttonName === speechText.trim());
+            console.log(buttonNames);
+            console.log(foundButtonIndex);
+            if (foundButtonIndex !== -1) {
+                document.querySelectorAll('button')[foundButtonIndex].click();
             }
+            else {
+                recognition.stop()
+                //recognition.start()    
+            }
+        }
 
-            recognition.onresult = function(event) {
-                var last = event.results.length - 1;
-                var speechText = event.results[last][0].transcript;
-                console.log('Heard ' + speechText);
-                const foundButtonIndex = buttonNames.findIndex(buttonName => buttonName === speechText.trim());
-                console.log(buttonNames);
-                console.log(foundButtonIndex);
-                if (foundButtonIndex !== -1) {
-                    document.querySelectorAll('button')[foundButtonIndex].click();
+        setInterval(resetVoiceRecog, 1000);
+        function resetVoiceRecog() {
+            recognition.stop()
+        }
+
+        recognition.onspeechend = function () {
+            recognition.stop();
+        }
+
+        recognition.onsoundend = function () {
+            recognition.stop();
+        }
+
+        recognition.onaudioend = function () {
+            recognition.stop();
+        }
+
+        recognition.onend = function () {
+            recognition.start();
+        }
+
+        recognition.onnomatch = function (event) {
+            //recognition.start();
+            console.log('Not recognized')
+        }
+
+        recognition.onerror = function (event) {
+            recognition.stop();
+            //recognition.start();
+            console.log('Error ' + event.error);
+        }
+    </script>
+
+    <!--Graphs-->
+    <script>
+        new Chart(document.getElementById("line-chart"), {
+            type: 'line',
+            data: {
+                labels: ["3 September", "10 September", "17 September", "24 September", "1 October", "8 October", "15 October", "22 October", "29 October", "5 November"],
+                datasets: [{
+                    data: [66, 74, 86, 90, 83, 85, 89, 90, 93, 92],
+                    label: "Atharv",
+                    borderColor: "#3e95cd",
+                    fill: false
+                }, {
+                    data: [84, 88, 85, 79, 83, 90, 93, 90, 91, 92],
+                    label: "Srivatsa",
+                    borderColor: "#8e5ea2",
+                    fill: false
+                }, {
+                    data: [60, 72, 75, 90, 88, 91, 90, 88, 92, 91],
+                    label: "Hakim",
+                    borderColor: "#3cba9f",
+                    fill: false
+                }, {
+                    data: [70, 72, 79, 85, 86, 90, 92, 89, 93, 90],
+                    label: "Maxine",
+                    borderColor: "#e8c3b9",
+                    fill: false
+                },
+                ]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Leaderboard'
                 }
             }
+        });
+    </script>
 
-            recognition.onspeechend = function() {
-                recognition.stop();
-                recognition.start();
+  
+    <script>
+        new Chart(document.getElementById("radar-chart"), {
+            type: 'radar',
+            data: {
+                labels: ["Accuracy", "Speed", "Colleagues measured", "Measuring Streaks", "Learner"],
+                datasets: [
+                    {
+                        label: "You",
+                        fill: true,
+                        backgroundColor: "rgba(60,186,159,0.2)",
+                        borderColor: "rgba(60,186,159,1)",
+                        pointBorderColor: "#fff",
+                        pointBackgroundColor: "rgba(255,99,132,1)",
+                        pointBorderColor: "#fff",
+                        data: [65, 26, 48, 65, 35]
+                    }
+                ]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Your Performance'
+                }
             }
-            
-            recognition.onsoundend = function() {
-                recognition.stop();
-                recognition.start();
-            }
-            
-            recognition.onaudioend = function() {
-                recognition.stop();
-                recognition.start();
-            }
+        });
 
-            recognition.onend = function() {
-                recognition.stop();
-                recognition.start();
-            }
+    </script>
 
-            recognition.onnomatch = function(event) {
-                recognition.stop();
-                recognition.start();
-                console.log('Not recognized')
-            }
+    <script>
 
-            recognition.onerror = function(event) {
-                recognition.stop();
-                recognition.start();
-                console.log('Error ' + event.error);
+        new Chart(document.getElementById("radar-chart-2"), {
+            type: 'radar',
+            data: {
+                labels: ["Neck", "Chest", "Shoulder", "Left Arm", "Right Arm", "Left Bicep", "Right Bicep"],
+                datasets: [
+                    {
+                        label: "You",
+                        fill: true,
+                        backgroundColor: "rgba(255,99,132,0.2)",
+                        borderColor: "rgba(255,99,132,1)",
+                        pointBorderColor: "#fff",
+                        pointBackgroundColor: "rgba(255,99,132,1)",
+                        pointBorderColor: "#fff",
+                        data: [77, 68, 79, 90, 82, 71, 84]
+                    }
+                ]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Scores for Various Body Measurements'
+                }
             }
-        </script>
+        });
 
-        <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/smoothscroll.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/jquery.parallax.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/owl.carousel.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/jquery.magnific-popup.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/magnific-popup-options.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/modernizr.custom.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/webcam.js') }}"></script>
+    </script>
+
+
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/smoothscroll.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.parallax.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.magnific-popup.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/magnific-popup-options.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modernizr.custom.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/webcam.js') }}"></script>
 </body>
 
 </html>

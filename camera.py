@@ -36,6 +36,7 @@ class VideoCamera(object):
     def read(self):
         img = cv2.resize(self.frame, (576, 432)) 
         img = cv2.flip( img, 1)
+
         #img = estimator.aruco_tracking(img, estimator.mtx, estimator.dist, None)
         return img
 

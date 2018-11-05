@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en"></html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+</head>
+
+<body>
+        <canvas id="line-chart" width="800" height="450"></canvas>
+</body>
+
+
+<script>
+new Chart(document.getElementById("line-chart"), {
+  type: 'line',
+  data: {
+    labels: ["3 September", "10 September", "17 September", "24 September", "1 October", "8 October", "15 October", "22 October", "29 October", "5 November"],
+    datasets: [{ 
+        data: [66,74,86,90,83,85,89,90,93,92],
+        label: "Atharv",
+        borderColor: "#3e95cd",
+        fill: false
+      }, { 
+        data: [84,88,85,79,83,90,93,90,91,92],
+        label: "Srivatsa",
+        borderColor: "#8e5ea2",
+        fill: false
+      }, { 
+        data: [60,72,75,90,88,91,90,88,92,91],
+        label: "Hakim",
+        borderColor: "#3cba9f",
+        fill: false
+      }, { 
+        data: [70,72,79,85,86,90,92,89,93,90],
+        label: "Maxine",
+        borderColor: "#e8c3b9",
+        fill: false
+      }, 
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: 'Score History'
+    }
+  }
+});
+</script>

@@ -24,26 +24,29 @@ from tape_tracker.tape_tracker import TapeTrackerThread
 
 app = Flask(__name__, static_url_path='')
 
-estimator = PoseEstimator()
-estimator.configure()
 dataQ = queue.Queue()
 errQ = queue.Queue()
+
+isDetInRightPlace = {"bool": "false"}
+estimator = PoseEstimator()
+estimator.configure()
+
 objd_in_q = queue.Queue()
 objd_out_q = queue.Queue()
 measurements_consol = {}
-ser = measurementSerialThread(dataQ, errQ, baudrate=115200)
-ser.daemon = True
-ser.start()
-print("Measurement thread started")
 
 tracker = TapeTrackerThread(objd_in_q, objd_out_q)
 tracker.daemon = True
 tracker.start()
 print("Tracker is initialised")
 
-#@app.before_first_request
-#def configure():
-#    estimator.configure()
+@app.before_first_request
+def configure():
+    #estimator.configure()
+    ser = measurementSerialThread(dataQ, errQ)
+    ser.daemon = True
+    ser.start()
+    print("Measurement thread started")
 
 @app.route('/js/<path:path>')
 def send_js(path):
@@ -60,6 +63,13 @@ def send_img(path):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/check_reference', methods=['POST'])
+def check_reference():
+  resp = make_response(json.dumps(isDetInRightPlace))
+  resp.status_code = 200
+  resp.headers['Access-Control-Allow-Origin'] = '*'
+  return resp
 
 @app.route('/get_readings' , methods=['GET','POST'])
 def get_readings():
@@ -83,6 +93,7 @@ def next():
 @app.route('/reset', methods=['POST'])
 def reset():
   estimator.state_reset()
+  isDetInRightPlace["bool"] ="false"
   resp = make_response("Success")
   resp.status_code = 200
   resp.headers['Access-Control-Allow-Origin'] = '*'
@@ -106,6 +117,7 @@ def video_feed():
 
 def gen(camera):
     count = 0
+    det_rect = None
     while True:
         if camera.stopped:
             break
@@ -119,7 +131,7 @@ def gen(camera):
         # estimate
         img_est, measurements = estimator.predict(img)
         measurements_consol[0] = measurements
-
+  
         # obj det
         objd_in_q.put(img)
         (img_det, bb_coord) = objd_out_q.get()
@@ -127,6 +139,7 @@ def gen(camera):
         if len(bb_coord) != 0 and count > 10:
           estimator.configure_tracker(bb_coord[0])
           count = 0
+          det_rect = bb_coord[0]
           print(bb_coord[0])
 
         count = count + 1
@@ -134,6 +147,10 @@ def gen(camera):
         if curr_state is not "reference":
           byte_frame = img_to_bytes(img_est)
         else:
+          rect = draw_ref_box(img)
+          isDetInPlace = check_if_in_rect(det_rect, rect)
+          isDetInRightPlace["bool"] = isDetInPlace
+      
           byte_frame = img_to_bytes(img_det)
 
         yield (b'--frame\r\n'
@@ -142,6 +159,34 @@ def gen(camera):
 def img_to_bytes(img):
   ret, jpeg = cv2.imencode('.jpg', img)
   return jpeg.tobytes()
+
+def draw_ref_box(img):
+  x = 210
+  y = 110
+  cv2.rectangle(img, (x, y), (x + 50, y + 50),
+                              (0, 0, 0), 2)
+  return [(x, y), (x+50, y+50)]
+
+def check_if_in_rect(det_rect, ref_rect):
+  isDetInRightPlace = False
+
+  if det_rect is None or ref_rect is None:
+    return isDetInRightPlace
+        
+  top_left_rect = ref_rect[0]
+  bot_right_rect = ref_rect[1]
+
+  top_left_tracker =  (det_rect[0], det_rect[1])
+  bot_right_tracker =  (det_rect[0]+det_rect[2], det_rect[1]+det_rect[3])
+
+  tracker_centre = ((top_left_tracker[0]+bot_right_tracker[0])*0.5, (top_left_tracker[1]+bot_right_tracker[1])*0.5)
+
+  if top_left_rect[0] < tracker_centre[0] \
+    and top_left_rect[1] < tracker_centre[1] \
+    and bot_right_rect[0] > tracker_centre[0] and bot_right_rect[1] > tracker_centre[1]:
+    isDetInRightPlace = True
+  
+  return isDetInRightPlace
 
 def get_bluno_data():
   measurement = read_measurement_from_serial()
@@ -155,4 +200,4 @@ def read_measurement_from_serial():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, threaded=True, ssl_context='adhoc')
+  app.run(host='0.0.0.0', debug=True, threaded=True, ssl_context='adhoc')
