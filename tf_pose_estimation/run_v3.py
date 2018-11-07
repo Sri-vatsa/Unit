@@ -46,8 +46,10 @@ class PoseEstimator():
         self.tracker = None
         self.trackerHasStarted = False
         self.isTrackerInRightPlace = False
+        
+        self.count = 0
 
-
+        self.mode = None
         self.state_manager = State(ALL_STATES)
         self.state = self.state_manager.get_current_state()
 
@@ -453,6 +455,7 @@ class PoseEstimator():
     def is_tracker_in_pose_rect(self, tracker_coord, pose_rect_corners):
         
         isTrackerInRightPlace = False
+        margin = 10
 
         if tracker_coord is None or pose_rect_corners is None:
             return isTrackerInRightPlace
@@ -465,8 +468,8 @@ class PoseEstimator():
 
         tracker_centre = ((top_left_tracker[0]+bot_right_tracker[0])*0.5, (top_left_tracker[1]+bot_right_tracker[1])*0.5)
 
-        if top_left_rect[0] < tracker_centre[0] and top_left_rect[1] < tracker_centre[1] \
-            and bot_right_rect[0] > tracker_centre[0] and bot_right_rect[1] > tracker_centre[1]:
+        if top_left_rect[0] - margin < tracker_centre[0] and top_left_rect[1] - margin < tracker_centre[1] \
+            and bot_right_rect[0] + margin > tracker_centre[0] and bot_right_rect[1] + margin > tracker_centre[1]:
             isTrackerInRightPlace = True
 
         #if top_left_rect[0] < top_left_tracker[0] and top_left_rect[1] < top_left_tracker[1] \
@@ -534,6 +537,9 @@ class PoseEstimator():
             self.initBB = (bb[0], bb[1], bb[2], bb[3])
         
     # Main functions
+    def set_mode(self, mode):
+        self.mode = mode
+
     def configure(self):
         #self.cam = cv2.VideoCapture(self.cam_id)
         # camera calibration
@@ -587,9 +593,10 @@ class PoseEstimator():
         pose_rect_corners = None
         tracker_coord = None
         arm_lengths_all = []
-        leg_lengths_all = []
+        pose_rect_corners_all = []
         # Process body data detected by model
         for human in range(len(body_coordinates)):
+            #print(human)
             each_human_coordinates = {}
             for part_id in range(18):
                 if body_coordinates[human].get(part_id):
@@ -608,13 +615,21 @@ class PoseEstimator():
                 left_arm_len, right_arm_len = self.compute_arm_length_for_one(each_human_coordinates)
                 shoulder_len = self.compute_shoulder_length_for_one(each_human_coordinates)
                 measurements = {}
-                measurements["shoulder"] = shoulder_len
-                measurements["left-arm"] = left_arm_len
-                measurements["right-arm"] = right_arm_len
-
+                if shoulder_len:
+                    measurements["shoulder"] = float("{0:.2f}".format(shoulder_len))
+                else:
+                    measurements["shoulder"] = shoulder_len
+                if left_arm_len:
+                    measurements["left-arm"] = float("{0:.2f}".format(left_arm_len))
+                else:
+                    measurements["left-arm"] = left_arm_len 
+                if right_arm_len:
+                    measurements["right-arm"] = float("{0:.2f}".format(right_arm_len)) 
+                else:
+                     measurements["right-arm"] = right_arm_len
 
             # Find centre of left arm
-            if self.state is ALL_STATES[2]:
+            if self.state is ALL_STATES[3]:
                 left_centre = self.compute_arm_centre_left(
                     each_human_coordinates)
                 left_arm_angle = self.compute_angle_of_left_arm(
@@ -625,9 +640,10 @@ class PoseEstimator():
                 if left_centre is not None:
                     image, pose_rect_corners = self.draw_angled_rec(
                         left_centre[0], left_centre[1], 30, 30, left_arm_angle, image)
+                    pose_rect_corners_all.append(pose_rect_corners)
 
             # Find centre of right arm
-            if self.state is ALL_STATES[3]:
+            if self.state is ALL_STATES[2]:
                 right_centre = self.compute_arm_centre_right(
                     each_human_coordinates)
                 right_arm_angle = self.compute_angle_of_right_arm(
@@ -638,16 +654,19 @@ class PoseEstimator():
                 if right_centre is not None:
                     image, pose_rect_corners = self.draw_angled_rec(
                         right_centre[0], right_centre[1], 30, 30, right_arm_angle, image)
+                    pose_rect_corners_all.append(pose_rect_corners)
 
             # draw measuring box for neck
             if self.state is ALL_STATES[4]:
                 image, pose_rect_corners = self.draw_measure_area_neck(
                     each_human_coordinates, image)
+                pose_rect_corners_all.append(pose_rect_corners)
 
             # draw measuring box for chest
             if self.state is ALL_STATES[5]:
                 image, pose_rect_corners = self.draw_measure_area_chest(
                     each_human_coordinates, image)
+                pose_rect_corners_all.append(pose_rect_corners)
 
             #print("Image shape: " + str(image.shape))
 
@@ -660,24 +679,35 @@ class PoseEstimator():
         if self.trackerHasStarted and self.initBB is not None and self.state not in AUTO_STEPS:
             image, tracker_coord = self.csrt_tracking(image, self.initBB, self.isTrackerInRightPlace)
 
-            self.isTrackerInRightPlace = self.is_tracker_in_pose_rect(
-                tracker_coord, pose_rect_corners)
+            isTrackerInPlace = [] 
+            for pose in pose_rect_corners_all:
+                isTrackerInPlace.append(self.is_tracker_in_pose_rect(
+                    tracker_coord, pose))
+
+            if len(isTrackerInPlace) > 1:
+                self.isTrackerInRightPlace = isTrackerInPlace[0] or isTrackerInPlace[1]
+            elif len(isTrackerInPlace) == 1:
+                self.isTrackerInRightPlace = isTrackerInPlace[0] 
         # Print measurements to screen
         #print("Arm measurements for each person (Left, Right):")
         # print(arm_lengths_all)
         # print("Leg measurements for each person (Left, Right):")
         # print(leg_lengths_all)
         logger.debug('show+')
-        cv2.putText(image,
-                    "FPS: %f" % (1.0 / (time.time() - self.fps_time)),
-                    (10, 10),  cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                    (0, 255, 0), 2)
+        #cv2.putText(image,
+        #            "FPS: %f" % (1.0 / (time.time() - self.fps_time)),
+        #            (10, 10),  cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+        #            (0, 255, 0), 2)
         #cv2.imshow('tf-pose-estimation result', image)
         self.fps_time = time.time()
         # cv2.waitKey(1)
         # if cv2.waitKey(1) == 27:
         #    break
         logger.debug('finished+')
+
+        if self.mode == "quiz":
+            image = orig_image
+
         return image, measurements
 
     '''

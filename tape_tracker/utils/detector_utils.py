@@ -15,7 +15,7 @@ detection_graph = tf.Graph()
 sys.path.append("..")
 
 # score threshold for showing bounding boxes.
-_score_thresh = 0.90
+_score_thresh = 0.95
 
 MODEL_NAME = os.path.join('tape_tracker', 'tape_inference_graph_v5')
 # Path to frozen detection graph. This is the actual model that is used for the object detection.

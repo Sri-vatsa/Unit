@@ -75,7 +75,8 @@ def check_reference():
 def get_readings():
     #data = request.form['keyword']
     data = get_bluno_data()
-    measurements_consol["data"] = data
+    if data != "No reading yet":
+      measurements_consol["data"] = "{0:.2f}".format(float(data))
     resp = make_response(json.dumps(measurements_consol))
     resp.status_code = 200
     resp.headers['Access-Control-Allow-Origin'] = '*'
@@ -94,6 +95,17 @@ def next():
 def reset():
   estimator.state_reset()
   isDetInRightPlace["bool"] ="false"
+  resp = make_response("Success")
+  resp.status_code = 200
+  resp.headers['Access-Control-Allow-Origin'] = '*'
+  return resp
+
+@app.route('/set_mode', methods=['POST'])
+def set_mode():
+  data = request.form
+  mode = json.loads(data["mode"])
+  print(mode)
+  estimator.set_mode(mode)
   resp = make_response("Success")
   resp.status_code = 200
   resp.headers['Access-Control-Allow-Origin'] = '*'
@@ -125,6 +137,7 @@ def gen(camera):
         #get_bluno_data()
 
         curr_state = estimator.state
+        curr_mode = estimator.mode
 
         img = camera.read()
 
@@ -140,12 +153,13 @@ def gen(camera):
           estimator.configure_tracker(bb_coord[0])
           count = 0
           det_rect = bb_coord[0]
-          print(bb_coord[0])
+          #print(bb_coord[0])
 
         count = count + 1
-
         if curr_state is not "reference":
           byte_frame = img_to_bytes(img_est)
+        elif curr_mode is "quiz":
+          byte_frame = img_to_bytes(img)
         else:
           rect = draw_ref_box(img)
           isDetInPlace = check_if_in_rect(det_rect, rect)

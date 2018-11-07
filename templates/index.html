@@ -21,9 +21,13 @@
 
     <!-- MAIN CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/radios-to-slider.css') }}">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/jquery.radios-to-slider.js') }}"></script>
+
 
 </head>
 
@@ -128,6 +132,13 @@
                     <h3 id="neck-state" style="display: None" align=center>Measure the neck circumference</h3>
                     <h3 id="chest-state" style="display: None" align=center>Measure the chest circumference</h3>
 
+                    <div id="radios" style="max-width: 100px; margin: auto;">
+                        <input id="train" name="options" type="radio">
+                        <label for="train"> Training </label>
+                        <input id="quiz" name="options" type="radio">
+                        <label for="quiz"> Quiz </label>
+                    </div>
+
                     <form>
                         <button id="start" class="btn btn-blue btn-fill-vert" type="button">Start</button>
                         <!--<input id="start" class="btn btn-blue btn-fill-vert" type="button" value="Start">-->
@@ -153,8 +164,13 @@
                 </div>
                 <div style="text-align: center">
                     <h4 id="start_text">Click start to begin</h4>
+                    <h4 id="start_again_text_alt" style="display: None">Congratulations! You have performed well!</h4>
+                    <h4 id="score_display1" style="display: None"> Your score for this round:</h4>
+                    <h3 id="score_display2"></h3>
+                    <h4 id="improvement" style="color:brown"></h4>
                     <h4 id="start_again_text" style="display: None"> Congratulations! You have completed another round
                         of measurement training</h4>
+                    <h4 id="mode_err" style="display: None; color: brown">Please select a mode</h4>
                     <h4 id="start_again_text_2" style="display: None"> Click start to try again</h4>
                     <h3 id="measurement_heading" style="display: None">Latest Reading(s):</h3>
                     <table id="measurements" align=center style="display: None">
@@ -356,7 +372,75 @@
         var cur_id = 3
         var count = 0
         var isReadingSet = false
+        
+        // clear everything on loading
+        for(i = 0; i < 6; i++){
+            $(states[i]).hide();
+        }
+        //////////////////////////////
+
+        var currentMode = null
+
+        var trainChecked = document.getElementById("train").checked
+        var quizChecked = document.getElementById("quiz").checked
+
+        if (trainChecked) {
+            currentMode = trainChecked
+        } else if (quizChecked) {
+            currentMode = quizChecked
+        }
+        else {
+            currentMode = null
+        }
+        // check if any mode is selected
+        var radio = $("#radios").radiosToSlider();
+
+        $("#radios").click(function (e) {
+            e.preventDefault();
+
+            var trainChecked = document.getElementById("train").checked
+            var quizChecked = document.getElementById("quiz").checked
+
+            if (trainChecked) {
+                currentMode = "train"
+            } else if (quizChecked) {
+                currentMode = "quiz"
+            }
+            else {
+                currentMode = null
+            }
+            console.log(currentMode)
+        });
+
         $("#start").click(function () {
+            
+            if(currentMode === null) {
+                $("#mode_err").show();
+                $("#start_text").hide();
+                $("#start_again_text").hide();
+                $("#start_again_text_2").hide();
+                $("#start_again_text_alt").hide();
+                return
+            }
+            
+            data = {
+                "mode": JSON.stringify(currentMode)
+            };
+            $.ajax({
+                url: 'set_mode',
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                async: true,
+                success: function (response) {
+                    console.log(response);	
+                    $('#video').html();
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
             $("#restart").show();
             $("#end").show();
             $("#start").hide();
@@ -364,6 +448,11 @@
             $("#next").show();
             $("#video").show();
             $("#audio").show();
+            $("#radios").hide();
+            $("#mode_err").hide();
+            $("#score_display1").hide();
+            $("#score_display2").hide();
+            $("#improvement").hide();
             count = 0
             cur_id = 2
             $(states[count]).show();
@@ -375,6 +464,7 @@
             $("#start_text").hide();
             $("#start_again_text").hide();
             $("#start_again_text_2").hide();
+            $("#start_again_text_alt").hide();
             recognition.start();
 
             for (i = 0; i < 7; i++) {
@@ -397,6 +487,12 @@
             for (i = 0; i < 7; i++) {
                 $(data_ids[i]).html(null)
             }
+
+            //var data = ['60.88', '60.93', '41.02', '21.20','21.18', '39.37', '95.25']            
+            //for (i = 0; i < 7; i++) {
+            //    $(data_ids[i]).html(data[i])
+            //}
+
             $.ajax({
                 url: 'reset',
                 type: 'POST',
@@ -457,14 +553,36 @@
             $("#video").hide();
             $("#audio").hide();
             $(states[count]).hide();
+            $("#radios").show();
             //$("#height_input").hide();
             //$("#height_submit").hide();
 
             $("#measurement_heading").hide();
             $("#measurements").hide();
-            $("#start_again_text").show();
-            $("#start_again_text_2").show();
+            $("#start_again_text_2").show(); 
+            $("#mode_err").hide();
+            
+            //weak measurement generation
+            var parts = ["left bicep", "right bicep", "neck", "chest", "shoulder"];
+            var index = Math.floor(Math.random() * 5);
+            var area = parts[index];
 
+            // score generation
+            var max = 95;
+            var min = 60;
+            var score = Math.floor(Math.random() * (max - min) + min);
+            
+            if (currentMode === "quiz"){
+                $("#score_display1").show();
+                $("#score_display2").html(String(score));
+                $("#score_display2").show();
+                $("#improvement").html("Weak area: " + area);
+                $("#improvement").show();
+                $("#start_again_text_alt").show();
+            } else if (currentMode === "train") {
+                $("#start_again_text").show();
+            }
+            currentMode = null;
             data = {
                 "action": "end"
             };
@@ -560,6 +678,7 @@
 
 
         var buttonNames = ['None', 'hello', 'stop', 'okay', 'next', 'reset'];
+        //var buttonNames = ['None', 'A', 'B', 'C', 'D', 'E'];
 
         var recognition = new SpeechRecognition();
         recognition.continuous = true;
@@ -666,7 +785,7 @@
         });
     </script>
 
-  
+
     <script>
         new Chart(document.getElementById("radar-chart"), {
             type: 'radar',
@@ -723,7 +842,6 @@
         });
 
     </script>
-
 
     <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
     <script src="{{ url_for('static', filename='js/smoothscroll.js') }}"></script>
