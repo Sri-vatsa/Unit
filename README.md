@@ -57,7 +57,47 @@ The solution built is a Python Flask application that processes images of throug
 
  6. Install dependencies:
     ```
-    $ pip install -r requirements.txt (for software dependencies)
+    $ pip install -r requirements.txt
     ```
- 7. make paf for pose estimation
- 8. 
+ 7. Make paf for pose estimation post processing:
+
+    a. Change directory to pafprocess:
+    ```
+    $ cd tf_pose_estimation/tf_pose/pafprocess
+    ```
+    b. Build the pafprocess module
+    ```
+    $ swig -python -c++ pafprocess.i && python3 setup.py build_ext --inplace
+    ```
+ 8. change directory back to root directory:
+
+    ```
+    $ cd ../../..
+    ```
+
+## Run application
+
+1. Run backend:
+
+```
+$ python main.py
+```
+
+2. Find your local ip address:
+
+In the anaconda prompt, type:
+```
+$ ipconfig 
+```
+
+IPv4 Address is your local ip address.Take note of this address. 
+
+E.g. 172.17.10.153
+
+3. Run the product demo in a browser
+
+a. Open any browser (Chrome is preferred)
+b. In the addressbar, type : `https://YOUR_IP_ADDRESS:5000`
+    E.g. `https://172.17.10.153:5000`
+
+_Note: If the browser alerts that the site is insecure, click on advanced settings -> continue anyway_
