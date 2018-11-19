@@ -1,0 +1,16 @@
+tensorflow
+flask
+six
+numpy
+virtualenv
+argparse
+matplotlib
+psutil
+requests
+scipy
+slidingwindow
+tqdm 
+scikit-image
+dill 
+fire
+requests
