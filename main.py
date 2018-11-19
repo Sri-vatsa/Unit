@@ -142,33 +142,34 @@ def gen(camera):
         img = camera.read()
 
         # estimate
-        img_est, measurements = estimator.predict(img)
-        measurements_consol[0] = measurements
+        if img is not None:
+          img_est, measurements = estimator.predict(img)
+          measurements_consol[0] = measurements
   
-        # obj det
-        objd_in_q.put(img)
-        (img_det, bb_coord) = objd_out_q.get()
+          # obj det
+          objd_in_q.put(img)
+          (img_det, bb_coord) = objd_out_q.get()
+          
+          if len(bb_coord) != 0 and count > 10:
+            estimator.configure_tracker(bb_coord[0])
+            count = 0
+            det_rect = bb_coord[0]
+            #print(bb_coord[0])
+
+          count = count + 1
+          if curr_state is not "reference":
+            byte_frame = img_to_bytes(img_est)
+          elif curr_mode is "quiz":
+            byte_frame = img_to_bytes(img)
+          else:
+            rect = draw_ref_box(img)
+            isDetInPlace = check_if_in_rect(det_rect, rect)
+            isDetInRightPlace["bool"] = isDetInPlace
         
-        if len(bb_coord) != 0 and count > 10:
-          estimator.configure_tracker(bb_coord[0])
-          count = 0
-          det_rect = bb_coord[0]
-          #print(bb_coord[0])
+            byte_frame = img_to_bytes(img_det)
 
-        count = count + 1
-        if curr_state is not "reference":
-          byte_frame = img_to_bytes(img_est)
-        elif curr_mode is "quiz":
-          byte_frame = img_to_bytes(img)
-        else:
-          rect = draw_ref_box(img)
-          isDetInPlace = check_if_in_rect(det_rect, rect)
-          isDetInRightPlace["bool"] = isDetInPlace
-      
-          byte_frame = img_to_bytes(img_det)
-
-        yield (b'--frame\r\n'
-              b'Content-Type: image/jpeg\r\n\r\n' + byte_frame + b'\r\n\r\n')
+          yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + byte_frame + b'\r\n\r\n')
 
 def img_to_bytes(img):
   ret, jpeg = cv2.imencode('.jpg', img)

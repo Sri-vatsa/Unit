@@ -672,7 +672,7 @@ class PoseEstimator():
 
         # TODO toggle between rectangle corners for different squares for different measurements
         #image = self.aruco_tracking(image, self.mtx, self.dist, pose_rect_corners)
-        if not self.trackerHasStarted and self.initBB is not None:
+        if not self.trackerHasStarted and self.initBB is not None and image is not None:
             self.tracker.init(image, self.initBB)
             self.trackerHasStarted = True
             
